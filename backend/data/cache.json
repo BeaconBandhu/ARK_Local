@@ -1,0 +1,77 @@
+{
+  "photosynthesis_INVERT": {
+    "what_is_wrong": "The gases are swapped in your answer. Plants take in CO2 and give out O2 — the opposite of what animals do.",
+    "story_fix": "Think of you and the plant as partners sharing air in a room. You breathe in O2 and breathe out CO2. The plant breathes in your CO2 and breathes out O2 for you. Together you keep each other alive.",
+    "follow_up_question": "If a plant and you were in a sealed glass room with no fresh air, would the air get better or worse over time? Why?"
+  },
+  "photosynthesis_HOLLOW": {
+    "what_is_wrong": "You said the right words — sunlight and food — but the steps in between are missing from your answer.",
+    "story_fix": "Saying a plant makes food from sunlight is like saying a roti makes itself from wheat. There are many steps in between — kneading, rolling, heating. The plant's steps are: catch sunlight with green leaves, pull in CO2 through tiny pores, drink water from roots, then mix them all to make sugar.",
+    "follow_up_question": "If you covered all a plant's leaves with black paint so no light could reach them, what would happen to the plant? What step breaks first?"
+  },
+  "photosynthesis_FRAGMENT": {
+    "what_is_wrong": "You got part of it right, but one important piece of the chain is missing — like a bullock-cart with one wheel off.",
+    "story_fix": "Photosynthesis has six helpers working together, like six people passing water buckets to put out a fire. If even one person steps away, the water stops. Check which helper you forgot to mention.",
+    "follow_up_question": "You explained what happens with sunlight and CO2. Now tell me — where does the water come from and what happens to it?"
+  },
+  "photosynthesis_GHOST": {
+    "what_is_wrong": "Your answer describes what animals do, not plants. Plants are the opposite — they work like a mirror image of our breathing.",
+    "story_fix": "Imagine two farmers facing each other, throwing grain back and forth. You throw CO2, the plant throws back O2. The plant never throws what it receives — it always throws the other thing back.",
+    "follow_up_question": "You said plants release CO2 like we do. But then where does the oxygen in the air come from? Who is making it?"
+  },
+  "photosynthesis_ORPHAN": {
+    "what_is_wrong": "The confusion starts earlier — with what gas exchange means. Once that is clear, the rest will fall into place.",
+    "story_fix": "Gas exchange just means swapping gases — like trading mangoes for rice in a village market. The plant and the air are trading. The plant gives O2, the air gives CO2. That swap is what keeps both alive.",
+    "follow_up_question": "What do you think happens at the tiny holes on the bottom of a leaf? What goes in and what comes out?"
+  },
+  "water_cycle_INVERT": {
+    "what_is_wrong": "The order of stages is reversed. Water evaporates first, then forms clouds, then falls as rain — not the other way.",
+    "story_fix": "Think of cooking rice. First the water heats up and steam rises (evaporation). The steam hits the cold lid and becomes water drops (condensation). Then drops fall back into the pot (precipitation). The cycle always goes in this order.",
+    "follow_up_question": "On a cold morning you see water drops on the outside of a steel tumbler filled with cold water. Which stage of the water cycle is this — evaporation or condensation? Why?"
+  },
+  "water_cycle_HOLLOW": {
+    "what_is_wrong": "You named the stages correctly but did not explain what actually happens at each step.",
+    "story_fix": "Knowing the names evaporation, condensation, precipitation is like knowing the names of crops without knowing how to grow them. Can you describe what actually changes at each step — solid, liquid or gas?",
+    "follow_up_question": "When water evaporates from a pond, where exactly does it go? Can you see it? Why or why not?"
+  },
+  "water_cycle_FRAGMENT": {
+    "what_is_wrong": "You explained most of the cycle but left out one stage. Without it the cycle cannot complete.",
+    "story_fix": "A water cycle with one stage missing is like a village well that people draw water from but nobody ever refills. Something must bring the water back to start. Which stage are you forgetting that brings it all back?",
+    "follow_up_question": "After rain falls on a field, where does the water go next — and how does it eventually return to the clouds?"
+  },
+  "water_cycle_GHOST": {
+    "what_is_wrong": "Clouds are not made of smoke or dust. They are made of tiny water droplets so small they float in the air.",
+    "story_fix": "Have you seen fog early in the morning near a river? That fog is the same as a cloud — just at ground level. Both are just tiny water drops floating. Next time there is fog, try to touch it. Your hand gets wet because it really is water.",
+    "follow_up_question": "If clouds were smoke, would rain be wet? What does your answer tell you about what clouds are really made of?"
+  },
+  "water_cycle_ORPHAN": {
+    "what_is_wrong": "The confusion comes from not fully understanding evaporation — the first step. Once that is clear, the rest follows.",
+    "story_fix": "Evaporation just means liquid water becoming invisible gas — like when wet clothes dry in the sun. The water does not disappear. It becomes water vapour floating in the air. That vapour is the start of every cloud.",
+    "follow_up_question": "Why do wet clothes dry faster in the sun than in the shade? What is the sun doing to the water?"
+  },
+  "food_chain_INVERT": {
+    "what_is_wrong": "The direction of eating is reversed. Plants do not eat animals. Animals eat plants, and some animals eat other animals.",
+    "story_fix": "In a village, the farmer grows food, the goat eats the farm grass, and the family eats the goat. The direction is always from smaller and simpler to bigger and more complex. Reverse it and nothing makes sense — a goat cannot eat a tiger.",
+    "follow_up_question": "If carnivores ate plants directly, what would happen to the herbivores? Would they still exist?"
+  },
+  "food_chain_HOLLOW": {
+    "what_is_wrong": "You named producer and consumer correctly, but you could not explain why the energy only moves in one direction.",
+    "story_fix": "Energy in a food chain is like money passed down a family. The grandmother earns it (plant, from sun). She gives some to her son (herbivore). He gives some to his son (carnivore). But money only flows forward — the grandson cannot give energy back to the grandmother.",
+    "follow_up_question": "Why can energy only flow from producers to consumers and not backwards? What would have to happen for it to go backwards?"
+  },
+  "food_chain_FRAGMENT": {
+    "what_is_wrong": "You described the eating chain well, but forgot the decomposers — the ones who clean up and return nutrients to the soil.",
+    "story_fix": "Imagine a village with no garbage collectors. Dead plants and animals would pile up everywhere. Decomposers are the garbage collectors of nature — they break everything down and put the nutrients back into the soil so plants can grow again. Without them the chain breaks.",
+    "follow_up_question": "What do you think would happen to a forest if all the bacteria and fungi suddenly disappeared? Would plants keep growing?"
+  },
+  "food_chain_GHOST": {
+    "what_is_wrong": "Energy does not increase as it moves up the food chain — it decreases at every step. Most energy is lost as heat.",
+    "story_fix": "Think of filling small pots from a big pot of water. Every time you pour, some water spills. By the time you reach the fifth pot, very little water is left. Energy works the same way — each animal in the chain gets less than the one below it.",
+    "follow_up_question": "If energy increases going up the chain, why are there fewer tigers than deer, and fewer deer than grass? What does the number of each organism tell you about the energy?"
+  },
+  "food_chain_ORPHAN": {
+    "what_is_wrong": "The confusion starts with not fully understanding what producers do. Once that is clear, the rest of the chain makes sense.",
+    "story_fix": "A producer is any living thing that makes its own food from sunlight — plants, algae, some bacteria. They are the only ones who can do this. Everything else in the chain is just passing that energy along. No producers means no chain at all.",
+    "follow_up_question": "If all the plants in a field died, what would happen to the insects, then the frogs, then the snakes? In what order would they disappear?"
+  }
+}

@@ -1,0 +1,12 @@
+fastapi
+uvicorn[standard]
+python-dotenv
+motor
+redis[hiredis]
+httpx
+python-multipart
+aiofiles
+watchdog
+Pillow
+markdown
+pymongo

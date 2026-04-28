@@ -1,0 +1,89 @@
+{
+  "photosynthesis": {
+    "definition": "Plants use sunlight, water and carbon dioxide to make glucose and release oxygen",
+    "keywords": ["sunlight", "co2", "carbon dioxide", "oxygen", "glucose", "chlorophyll", "leaves", "water", "energy", "food"],
+    "prerequisites": ["gas_exchange", "chlorophyll", "sunlight_energy", "glucose_production", "water_absorption", "cellular_respiration"],
+    "correct_model": "Plants absorb sunlight through chlorophyll in their leaves. They take in CO2 from air through tiny pores called stomata. They absorb water through roots. Using sunlight energy, they convert CO2 and water into glucose (food) and release oxygen as a byproduct.",
+    "node_weights": {
+      "gas_exchange": 0.25,
+      "chlorophyll": 0.15,
+      "sunlight_energy": 0.2,
+      "glucose_production": 0.15,
+      "water_absorption": 0.1,
+      "cellular_respiration": 0.15
+    },
+    "node_keywords": {
+      "gas_exchange": ["co2", "carbon dioxide", "oxygen", "o2", "stomata", "pores", "gas", "air"],
+      "chlorophyll": ["chlorophyll", "green", "pigment", "leaves", "colour", "color"],
+      "sunlight_energy": ["sunlight", "sun", "light", "solar", "energy", "photon"],
+      "glucose_production": ["glucose", "sugar", "food", "starch", "carbohydrate"],
+      "water_absorption": ["water", "roots", "soil", "absorb", "drink"],
+      "cellular_respiration": ["respiration", "breathe", "cells", "energy release", "mitochondria"]
+    },
+    "common_errors": {
+      "INVERT": "Student says plants release CO2 and absorb O2, swapping the gases",
+      "HOLLOW": "Student says 'plants make food using sunlight' but cannot explain the gas exchange or mechanism",
+      "FRAGMENT": "Student correctly describes gas exchange but forgets water or chlorophyll role",
+      "GHOST": "Student believes plants breathe exactly like animals — in O2, out CO2",
+      "ORPHAN": "Student never understood what gas exchange means, so the whole process is confused"
+    }
+  },
+  "water_cycle": {
+    "definition": "Water continuously moves between the earth, oceans and atmosphere through evaporation, condensation and precipitation",
+    "keywords": ["evaporation", "condensation", "precipitation", "rain", "clouds", "water vapour", "sun", "collection", "runoff"],
+    "prerequisites": ["evaporation", "condensation", "precipitation", "collection", "transpiration", "solar_energy"],
+    "correct_model": "The sun heats water in oceans, rivers and lakes, turning it into water vapour (evaporation). Plants also release water vapour (transpiration). Water vapour rises, cools and forms clouds (condensation). When clouds get heavy, water falls as rain or snow (precipitation). Water collects in rivers, lakes and groundwater (collection) and the cycle repeats.",
+    "node_weights": {
+      "evaporation": 0.2,
+      "condensation": 0.2,
+      "precipitation": 0.2,
+      "collection": 0.15,
+      "transpiration": 0.1,
+      "solar_energy": 0.15
+    },
+    "node_keywords": {
+      "evaporation": ["evaporation", "evaporate", "vapour", "vapor", "steam", "turns into gas", "heats up"],
+      "condensation": ["condensation", "condense", "clouds", "droplets", "cool", "water vapour cools"],
+      "precipitation": ["precipitation", "rain", "snow", "hail", "falls", "rainfall"],
+      "collection": ["collection", "collect", "rivers", "lakes", "groundwater", "ocean", "sea", "runoff"],
+      "transpiration": ["transpiration", "plants", "leaves", "transpire", "release water"],
+      "solar_energy": ["sun", "solar", "sunlight", "heat", "energy", "warms"]
+    },
+    "common_errors": {
+      "INVERT": "Student says rain causes evaporation or reverses the order of stages",
+      "HOLLOW": "Student names the stages but cannot explain what happens at each step",
+      "FRAGMENT": "Student describes evaporation and rain but forgets condensation forming clouds",
+      "GHOST": "Student believes clouds are made of smoke or dust, not water vapour",
+      "ORPHAN": "Student does not understand evaporation so the rest of cycle is disconnected"
+    }
+  },
+  "food_chain": {
+    "definition": "Energy flows from producers to consumers in a sequence where each organism eats the one before it",
+    "keywords": ["producer", "consumer", "herbivore", "carnivore", "decomposer", "energy", "food", "predator", "prey", "trophic"],
+    "prerequisites": ["producer", "primary_consumer", "secondary_consumer", "decomposer", "energy_flow", "trophic_levels"],
+    "correct_model": "Plants (producers) make food using sunlight. Herbivores (primary consumers) eat plants and get energy. Carnivores (secondary consumers) eat herbivores. Decomposers like fungi and bacteria break down dead organisms, returning nutrients to soil. Energy flows in one direction from sun → plants → herbivores → carnivores, but decreases at each step.",
+    "node_weights": {
+      "producer": 0.2,
+      "primary_consumer": 0.2,
+      "secondary_consumer": 0.15,
+      "decomposer": 0.15,
+      "energy_flow": 0.2,
+      "trophic_levels": 0.1
+    },
+    "node_keywords": {
+      "producer": ["producer", "plant", "grass", "tree", "algae", "make food", "photosynthesis"],
+      "primary_consumer": ["primary consumer", "herbivore", "eats plants", "rabbit", "deer", "cow", "goat"],
+      "secondary_consumer": ["secondary consumer", "carnivore", "predator", "eats herbivore", "lion", "snake", "hawk"],
+      "decomposer": ["decomposer", "fungi", "bacteria", "break down", "decay", "rot", "mushroom"],
+      "energy_flow": ["energy", "flows", "transfer", "decreases", "10 percent", "lost", "heat"],
+      "trophic_levels": ["trophic", "level", "level one", "level two", "food web", "chain"]
+    },
+    "common_errors": {
+      "INVERT": "Student reverses who eats whom — says carnivores eat plants or plants eat animals",
+      "HOLLOW": "Student can name producer and consumer but cannot explain why energy flows that way",
+      "FRAGMENT": "Student understands predator-prey but forgets decomposers or energy loss at each level",
+      "GHOST": "Student believes energy increases as it moves up the chain",
+      "ORPHAN": "Student never understood what producers do, so consumer roles are confused"
+    }
+  }
+}

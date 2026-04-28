@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>ARK — Teacher Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a14;--surface:#12121f;--card:#1a1a2e;--border:#1e293b;
+  --text:#e2e8f0;--muted:#64748b;--faint:#1e293b;
+  --indigo:#6366f1;--green:#10b981;--red:#ef4444;--amber:#f59e0b;
+  --blue:#3b82f6;--purple:#8b5cf6;
+  --fp-GHOST:#f59e0b;--fp-INVERT:#ef4444;--fp-HOLLOW:#3b82f6;
+  --fp-FRAGMENT:#10b981;--fp-ORPHAN:#8b5cf6;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);display:flex;height:100vh;overflow:hidden}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--surface)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* SIDEBAR */
+.sidebar{width:220px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:20px 0}
+.logo{color:var(--indigo);font-size:22px;font-weight:900;letter-spacing:4px;padding:0 20px 24px}
+.logo span{color:var(--muted);font-size:11px;font-weight:500;display:block;letter-spacing:1px;margin-top:2px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:11px 20px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border-left:3px solid transparent}
+.nav-item:hover{color:var(--text);background:#ffffff08}
+.nav-item.active{color:var(--indigo);background:#6366f115;border-left-color:var(--indigo)}
+.nav-icon{font-size:16px;width:20px;text-align:center}
+.sidebar-footer{margin-top:auto;padding:16px 20px;border-top:1px solid var(--border)}
+.status-row{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.status-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.status-label{font-size:11px;color:var(--muted)}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.topbar-title{font-size:15px;font-weight:700;color:var(--text)}
+.topbar-title span{color:var(--muted);font-weight:400;font-size:13px;margin-left:8px}
+.topbar-actions{display:flex;align-items:center;gap:8px}
+select.ctrl{background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:6px 12px;font-size:13px;cursor:pointer}
+button.ctrl{background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--muted);padding:6px 14px;font-size:13px;cursor:pointer;transition:all .15s}
+button.ctrl:hover{color:var(--text);border-color:var(--indigo)}
+button.ctrl.danger:hover{color:var(--red);border-color:var(--red)}
+button.ctrl.primary{background:var(--indigo);border-color:var(--indigo);color:#fff}
+.content{flex:1;overflow-y:auto;padding:24px}
+
+/* TABS */
+.tab{display:none}
+.tab.active{display:block}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px}
+.card-title{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:14px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px}
+.metric-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;border-left:4px solid}
+.metric-val{font-size:34px;font-weight:800;line-height:1;margin-bottom:4px}
+.metric-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.metric-sub{font-size:12px;color:var(--muted);margin-top:4px}
+.chart-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px}
+
+/* FINGERPRINT BADGE */
+.fp-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:700;letter-spacing:1px}
+
+/* STUDENT TABLE */
+.search-bar{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 16px;color:var(--text);font-size:14px;width:320px;margin-bottom:16px}
+.search-bar::placeholder{color:var(--muted)}
+.student-table{width:100%;border-collapse:collapse}
+.student-table th{text-align:left;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;padding:8px 12px;border-bottom:1px solid var(--border)}
+.student-table td{padding:12px;border-bottom:1px solid var(--faint);vertical-align:middle}
+.student-table tr:hover td{background:#ffffff04;cursor:pointer}
+.avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+.drift-bar-wrap{display:flex;align-items:center;gap:8px}
+.drift-bar-bg{width:80px;height:6px;background:var(--faint);border-radius:3px;overflow:hidden}
+.drift-bar-fill{height:100%;border-radius:3px}
+
+/* STUDENT DETAIL MODAL */
+.modal-overlay{position:fixed;inset:0;background:#000000cc;z-index:200;display:none;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:20px;width:min(900px,95vw);max-height:90vh;overflow-y:auto;padding:28px;position:relative}
+.modal-close{position:absolute;top:16px;right:16px;background:var(--faint);border:none;color:var(--muted);font-size:18px;width:32px;height:32px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.modal-close:hover{color:var(--text)}
+.modal-header{display:flex;align-items:flex-start;gap:16px;margin-bottom:24px}
+.modal-avatar{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0}
+.modal-name{font-size:20px;font-weight:700}
+.modal-meta{font-size:13px;color:var(--muted);margin-top:2px}
+.modal-charts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px}
+.modal-chart-box{background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:16px}
+.modal-chart-title{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.info-card{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px}
+.info-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.info-val{font-size:13px;line-height:1.6}
+.node-chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid}
+.history-section{margin-top:20px}
+.history-title{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px}
+
+/* ACTION ITEMS */
+.action-item{border-left:3px solid;border-radius:0 12px 12px 0;padding:12px 16px;margin-bottom:10px}
+.action-fp{font-weight:700;font-size:13px;margin-bottom:4px}
+.action-desc{font-size:13px;color:var(--muted);line-height:1.5}
+.action-names{font-size:11px;color:var(--faint);margin-top:5px}
+
+/* CHAT */
+.chat-wrap{display:flex;flex-direction:column;height:calc(100vh - 160px)}
+.chat-messages{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:12px;padding:4px 0;margin-bottom:16px}
+.bubble{padding:12px 16px;border-radius:14px;max-width:80%;font-size:14px;line-height:1.7;white-space:pre-wrap;word-break:break-word}
+.bubble.user{background:var(--indigo);color:#fff;align-self:flex-end;border-radius:14px 14px 4px 14px}
+.bubble.ai{background:var(--card);color:var(--text);align-self:flex-start;border-radius:14px 14px 14px 4px}
+.bubble.sys{background:var(--faint);color:var(--muted);align-self:center;font-size:12px;border-radius:8px}
+.chat-input-row{display:flex;gap:8px}
+.chat-input{flex:1;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 16px;color:var(--text);font-size:14px;resize:none;font-family:inherit}
+.chat-input:focus{outline:none;border-color:var(--indigo)}
+.send-btn{background:var(--indigo);border:none;color:#fff;font-weight:700;padding:0 24px;border-radius:12px;cursor:pointer;font-size:14px}
+.send-btn:disabled{opacity:.5;cursor:default}
+
+/* SETTINGS */
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:16px 0;border-bottom:1px solid var(--border)}
+.setting-label{font-size:14px;font-weight:500}
+.setting-desc{font-size:12px;color:var(--muted);margin-top:2px}
+
+/* LIVE BADGE */
+.live-badge{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--green)}
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* UTILS */
+.flex{display:flex}.gap-2{gap:8px}.gap-3{gap:12px}.items-center{align-items:center}.justify-between{justify-content:space-between}
+.mt-1{margin-top:4px}.mt-2{margin-top:8px}.mt-3{margin-top:12px}.mb-1{margin-bottom:4px}.mb-2{margin-bottom:8px}
+.text-sm{font-size:13px}.text-xs{font-size:11px}.text-muted{color:var(--muted)}.font-bold{font-weight:700}
+.empty-state{text-align:center;padding:48px;color:var(--muted);font-size:14px}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">ARK<span>Teacher Dashboard</span></div>
+  <nav>
+    <div class="nav-item active" onclick="showTab('overview')">
+      <span class="nav-icon">📊</span> Overview
+    </div>
+    <div class="nav-item" onclick="showTab('students')">
+      <span class="nav-icon">👥</span> Students
+    </div>
+    <div class="nav-item" onclick="showTab('chat')">
+      <span class="nav-icon">💬</span> Vault Chat
+    </div>
+    <div class="nav-item" onclick="showTab('settings')">
+      <span class="nav-icon">⚙️</span> Settings
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="status-row">
+      <div class="status-dot" id="dot-ollama" style="background:var(--muted)"></div>
+      <span class="status-label">Ollama</span>
+    </div>
+    <div class="status-row">
+      <div class="status-dot" id="dot-mongo" style="background:var(--muted)"></div>
+      <span class="status-label">MongoDB</span>
+    </div>
+    <div class="status-row">
+      <div class="status-dot" id="dot-redis" style="background:var(--muted)"></div>
+      <span class="status-label">Redis</span>
+    </div>
+    <div class="status-row">
+      <div class="status-dot" id="dot-ws" style="background:var(--muted)"></div>
+      <span class="status-label" id="ws-label">WebSocket</span>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <header class="topbar">
+    <div>
+      <span class="topbar-title">Teacher Dashboard
+        <span id="topic-label">— photosynthesis</span>
+      </span>
+    </div>
+    <div class="topbar-actions">
+      <div class="live-badge" id="live-badge" style="display:none">
+        <div class="live-dot"></div> LIVE
+      </div>
+      <select class="ctrl" id="topic-select" onchange="handleTopicChange(this.value)">
+        <option value="photosynthesis">Photosynthesis</option>
+        <option value="water_cycle">Water Cycle</option>
+        <option value="food_chain">Food Chain</option>
+      </select>
+      <button class="ctrl" onclick="exportCSV()">Export CSV</button>
+      <button class="ctrl danger" onclick="clearSession()">Clear Session</button>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- ═══ OVERVIEW TAB ═══ -->
+    <div class="tab active" id="tab-overview">
+      <div class="grid-4" id="metrics-row">
+        <div class="metric-card" style="border-left-color:var(--indigo)">
+          <div class="metric-val" id="m-answered" style="color:var(--indigo)">0/30</div>
+          <div class="metric-label">Answered</div>
+        </div>
+        <div class="metric-card" style="border-left-color:var(--green)">
+          <div class="metric-val" id="m-understood" style="color:var(--green)">0</div>
+          <div class="metric-label">Understood</div>
+          <div class="metric-sub">drift &lt; 0.3</div>
+        </div>
+        <div class="metric-card" style="border-left-color:var(--red)">
+          <div class="metric-val" id="m-critical" style="color:var(--red)">0</div>
+          <div class="metric-label">Critical Gaps</div>
+          <div class="metric-sub">drift ≥ 0.7</div>
+        </div>
+        <div class="metric-card" style="border-left-color:var(--amber)">
+          <div class="metric-val" id="m-drift" style="color:var(--amber)">—</div>
+          <div class="metric-label">Avg Drift</div>
+          <div class="metric-sub">0 = perfect · 1 = lost</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="chart-box">
+          <div class="card-title">Fingerprint distribution</div>
+          <canvas id="chart-fp" height="200"></canvas>
+        </div>
+        <div class="chart-box">
+          <div class="card-title">Auto-generated action items</div>
+          <div id="action-items"><p class="empty-state">Waiting for student submissions...</p></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Recent submissions</div>
+        <div id="recent-feed"><p class="empty-state">No submissions yet.</p></div>
+      </div>
+    </div>
+
+    <!-- ═══ STUDENTS TAB ═══ -->
+    <div class="tab" id="tab-students">
+      <div class="flex gap-2 items-center justify-between mb-2" style="margin-bottom:16px">
+        <input class="search-bar" id="search-input" placeholder="Search name, ID or fingerprint..." oninput="filterStudents()"/>
+        <span class="text-muted text-sm" id="student-count">0 students</span>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <table class="student-table">
+          <thead>
+            <tr>
+              <th style="padding-left:20px">Student</th>
+              <th>Topic</th>
+              <th>Fingerprint</th>
+              <th>Drift</th>
+              <th>Language</th>
+              <th>Time</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="student-tbody">
+            <tr><td colspan="7" class="empty-state">No students yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══ CHAT TAB ═══ -->
+    <div class="tab" id="tab-chat">
+      <div class="card chat-wrap">
+        <div class="flex items-center justify-between mb-2" style="margin-bottom:16px">
+          <div class="card-title" style="margin:0">Obsidian Vault Chat</div>
+          <button class="ctrl" onclick="reindexVault()">Re-index vault</button>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+          <div class="bubble sys">Ask anything from your Obsidian notes. Powered by Ollama on this machine.</div>
+        </div>
+        <div class="chat-input-row">
+          <textarea class="chat-input" id="chat-input" rows="2" placeholder="Ask about your notes, lessons, student gaps..."
+            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}"></textarea>
+          <button class="send-btn" id="send-btn" onclick="sendChat()">Send</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SETTINGS TAB ═══ -->
+    <div class="tab" id="tab-settings">
+      <div class="card">
+        <div class="card-title">Session & Topic</div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Current topic</div>
+            <div class="setting-desc">Changes what students see and what hexgraph is loaded</div>
+          </div>
+          <select class="ctrl" id="settings-topic" onchange="handleTopicChange(this.value)">
+            <option value="photosynthesis">Photosynthesis</option>
+            <option value="water_cycle">Water Cycle</option>
+            <option value="food_chain">Food Chain</option>
+          </select>
+        </div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Clear session data</div>
+            <div class="setting-desc">Removes all student results from this session (Redis + in-memory)</div>
+          </div>
+          <button class="ctrl danger" onclick="clearSession()">Clear session</button>
+        </div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Export to CSV</div>
+            <div class="setting-desc">Download all student results as a spreadsheet</div>
+          </div>
+          <button class="ctrl" onclick="exportCSV()">Export CSV</button>
+        </div>
+      </div>
+
+      <div class="card mt-3" style="margin-top:16px">
+        <div class="card-title">Service Status</div>
+        <div id="status-detail" style="font-size:13px;color:var(--muted);line-height:2">Loading...</div>
+      </div>
+
+      <div class="card mt-3" style="margin-top:16px">
+        <div class="card-title">Fingerprint Legend</div>
+        <div id="fp-legend"></div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- ═══════ STUDENT DETAIL MODAL ═══════ -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal-box">
+    <button class="modal-close" onclick="closeModalBtn()">✕</button>
+
+    <div class="modal-header">
+      <div class="modal-avatar" id="m-avatar"></div>
+      <div>
+        <div class="modal-name" id="m-name"></div>
+        <div class="modal-meta" id="m-meta"></div>
+        <div style="margin-top:8px" id="m-badge"></div>
+      </div>
+    </div>
+
+    <!-- 3 charts: radar, gauge, topic nodes -->
+    <div class="modal-charts">
+      <div class="modal-chart-box">
+        <div class="modal-chart-title">Concept node activation (H-6 Hexgraph)</div>
+        <canvas id="chart-radar" height="200"></canvas>
+      </div>
+      <div class="modal-chart-box">
+        <div class="modal-chart-title">Drift score</div>
+        <canvas id="chart-drift-gauge" height="200"></canvas>
+      </div>
+      <div class="modal-chart-box">
+        <div class="modal-chart-title">Session history (drift over time)</div>
+        <canvas id="chart-history" height="200"></canvas>
+      </div>
+    </div>
+
+    <!-- Node chips -->
+    <div class="flex gap-3 mb-2" style="margin-bottom:16px;gap:16px">
+      <div style="flex:1">
+        <div class="info-label">Activated nodes</div>
+        <div class="node-chips" id="m-activated"></div>
+      </div>
+      <div style="flex:1">
+        <div class="info-label">Skipped / missing nodes</div>
+        <div class="node-chips" id="m-skipped"></div>
+      </div>
+    </div>
+
+    <!-- Text info grid -->
+    <div class="info-grid">
+      <div class="info-card" style="grid-column:1/-1">
+        <div class="info-label">What the student said</div>
+        <div class="info-val" style="color:var(--muted);font-style:italic" id="m-said"></div>
+      </div>
+      <div class="info-card" style="border-left:3px solid var(--red)">
+        <div class="info-label">What is wrong</div>
+        <div class="info-val" style="color:#fca5a5" id="m-wrong"></div>
+      </div>
+      <div class="info-card" style="border-left:3px solid var(--purple)">
+        <div class="info-label">Story analogy</div>
+        <div class="info-val" style="color:#c4b5fd" id="m-story"></div>
+      </div>
+      <div class="info-card" style="border-left:3px solid var(--blue)">
+        <div class="info-label">Follow-up question</div>
+        <div class="info-val" style="color:#7dd3fc;font-style:italic" id="m-followup"></div>
+      </div>
+      <div class="info-card" style="border-left:3px solid var(--green)">
+        <div class="info-label">Peer suggestion</div>
+        <div class="info-val" style="color:#6ee7b7" id="m-peer"></div>
+      </div>
+    </div>
+
+    <!-- History table -->
+    <div class="history-section" id="history-section" style="display:none">
+      <div class="history-title">Previous submissions</div>
+      <table class="student-table" id="history-table" style="font-size:12px">
+        <thead>
+          <tr>
+            <th>Time</th><th>Topic</th><th>Fingerprint</th><th>Drift</th><th>What they said</th>
+          </tr>
+        </thead>
+        <tbody id="history-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════════════
+let allStudents = [];
+let ws = null;
+let chartFP = null;
+let chartRadar = null;
+let chartDriftGauge = null;
+let chartHistory = null;
+
+const FP_COLORS = {
+  GHOST:'#f59e0b', INVERT:'#ef4444', HOLLOW:'#3b82f6',
+  FRAGMENT:'#10b981', ORPHAN:'#8b5cf6'
+};
+const FP_ACTIONS = {
+  INVERT:'Spend 5 min on the partner analogy — explain that plants and humans swap gases (plants in CO2, out O2).',
+  GHOST:'These students have a strong wrong belief. Use a real demonstration or counter-example to challenge it directly.',
+  HOLLOW:'Students know the words but not the steps. Make them draw the process or act it out physically.',
+  FRAGMENT:'Identify the one missing link per student. Peer-pair them with students who have that node activated.',
+  ORPHAN:'The problem is upstream. Go back to the prerequisite concept before re-teaching this topic.'
+};
+
+// ══════════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  loadData();
+  loadStatus();
+  loadFPLegend();
+  connectWebSocket();
+  setInterval(loadData, 10000);
+  setInterval(loadStatus, 15000);
+});
+
+// ══════════════════════════════════════════════════════════════════
+// DATA LOADING
+// ══════════════════════════════════════════════════════════════════
+async function loadData() {
+  try {
+    const r = await fetch('/api/class-data');
+    const data = await r.json();
+    allStudents = data.students || [];
+    renderAll();
+  } catch(e) { console.warn('loadData failed', e); }
+}
+
+async function loadStatus() {
+  try {
+    const r = await fetch('/api/status');
+    const s = await r.json();
+    setDot('dot-ollama', s.ollama);
+    setDot('dot-mongo', s.mongo);
+    setDot('dot-redis', s.redis);
+
+    const detail = document.getElementById('status-detail');
+    detail.innerHTML = `
+      <div>Ollama: <strong style="color:${s.ollama?'var(--green)':'var(--red)'}">${s.ollama?'Running':'Offline'}</strong>
+        ${s.ollama_models?.length ? ' — ' + s.ollama_models.join(', ') : ''}</div>
+      <div>MongoDB: <strong style="color:${s.mongo?'var(--green)':'var(--amber)'}">${s.mongo?'Connected':'Using memory fallback'}</strong></div>
+      <div>Redis: <strong style="color:${s.redis?'var(--green)':'var(--amber)'}">${s.redis?'Connected':'Using memory fallback'}</strong></div>
+      <div>Obsidian vault: <strong style="color:${s.obsidian_configured?'var(--green)':'var(--muted)'}">${s.obsidian_configured?'Configured':'Not configured'}</strong></div>
+      <div>Current topic: <strong style="color:var(--indigo)">${s.current_topic?.topic || '—'}</strong></div>
+    `;
+  } catch {}
+}
+
+async function loadFPLegend() {
+  try {
+    const r = await fetch('/api/fingerprint-legend');
+    const data = await r.json();
+    const el = document.getElementById('fp-legend');
+    el.innerHTML = Object.entries(data).map(([fp, info]) => `
+      <div class="setting-row" style="border-bottom:1px solid var(--border);padding:14px 0">
+        <div style="display:flex;align-items:center;gap:12px">
+          <span class="fp-badge" style="background:${info.color}22;color:${info.color};border:1px solid ${info.color}">${fp}</span>
+          <span class="text-sm text-muted">${info.description}</span>
+        </div>
+      </div>
+    `).join('');
+  } catch {}
+}
+
+// ══════════════════════════════════════════════════════════════════
+// RENDER ALL
+// ══════════════════════════════════════════════════════════════════
+function renderAll() {
+  renderMetrics();
+  renderFPChart();
+  renderActionItems();
+  renderRecentFeed();
+  renderStudentTable(allStudents);
+}
+
+function renderMetrics() {
+  const n = allStudents.length;
+  const understood = allStudents.filter(s => s.drift_score < 0.3).length;
+  const critical = allStudents.filter(s => s.drift_score >= 0.7).length;
+  const avgDrift = n ? (allStudents.reduce((a,s) => a + (s.drift_score||0), 0) / n).toFixed(2) : '—';
+
+  document.getElementById('m-answered').textContent = `${n}/30`;
+  document.getElementById('m-understood').textContent = understood;
+  document.getElementById('m-critical').textContent = critical;
+  document.getElementById('m-drift').textContent = avgDrift;
+}
+
+function renderFPChart() {
+  const labels = ['INVERT','GHOST','HOLLOW','FRAGMENT','ORPHAN'];
+  const counts = labels.map(fp => allStudents.filter(s => s.fingerprint === fp).length);
+  const colors = labels.map(fp => FP_COLORS[fp]);
+
+  if (chartFP) chartFP.destroy();
+  const ctx = document.getElementById('chart-fp').getContext('2d');
+  chartFP = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Students',
+        data: counts,
+        backgroundColor: colors.map(c => c + 'bb'),
+        borderColor: colors,
+        borderWidth: 2,
+        borderRadius: 8,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' } },
+        y: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8', stepSize: 1 }, beginAtZero: true }
+      }
+    }
+  });
+}
+
+function renderActionItems() {
+  const grouped = {};
+  for (const s of allStudents) {
+    if (!grouped[s.fingerprint]) grouped[s.fingerprint] = [];
+    grouped[s.fingerprint].push(s);
+  }
+  const ready = allStudents.filter(s => s.drift_score < 0.3);
+  const sorted = Object.entries(grouped).sort((a,b) => b[1].length - a[1].length);
+  const el = document.getElementById('action-items');
+  if (!sorted.length && !ready.length) {
+    el.innerHTML = '<p class="empty-state">Waiting for student submissions...</p>'; return;
+  }
+  el.innerHTML = sorted.map(([fp, grp]) => `
+    <div class="action-item" style="border-left-color:${FP_COLORS[fp]};background:${FP_COLORS[fp]}11">
+      <div class="action-fp" style="color:${FP_COLORS[fp]}">${grp.length} student${grp.length!==1?'s':''} — ${fp}</div>
+      <div class="action-desc">${FP_ACTIONS[fp] || ''}</div>
+      <div class="action-names">${grp.map(s=>s.student_name).join(', ')}</div>
+    </div>
+  `).join('') + (ready.length ? `
+    <div class="action-item" style="border-left-color:var(--green);background:#10b98111">
+      <div class="action-fp" style="color:var(--green)">${ready.length} student${ready.length!==1?'s':''} ready — assign as peer helpers</div>
+      <div class="action-names">${ready.map(s=>s.student_name).join(', ')}</div>
+    </div>
+  ` : '');
+}
+
+function renderRecentFeed() {
+  const recent = [...allStudents].sort((a,b) => new Date(b.timestamp||0) - new Date(a.timestamp||0)).slice(0,8);
+  const el = document.getElementById('recent-feed');
+  if (!recent.length) { el.innerHTML = '<p class="empty-state">No submissions yet.</p>'; return; }
+  el.innerHTML = recent.map(s => `
+    <div class="flex items-center gap-2" style="padding:10px 0;border-bottom:1px solid var(--faint);gap:12px;cursor:pointer" onclick="openStudentModal('${s.student_id}')">
+      ${avatarEl(s.student_name, s.fingerprint, 32)}
+      <div style="flex:1">
+        <span style="font-size:14px;font-weight:600">${s.student_name}</span>
+        <span class="text-muted text-sm" style="margin-left:8px">${s.topic}</span>
+      </div>
+      ${fpBadge(s.fingerprint)}
+      <span class="text-xs text-muted">${timeAgo(s.timestamp)}</span>
+    </div>
+  `).join('');
+}
+
+// ══════════════════════════════════════════════════════════════════
+// STUDENT TABLE
+// ══════════════════════════════════════════════════════════════════
+function renderStudentTable(students) {
+  const tbody = document.getElementById('student-tbody');
+  document.getElementById('student-count').textContent = `${students.length} student${students.length!==1?'s':''}`;
+  if (!students.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No students yet.</td></tr>'; return;
+  }
+  tbody.innerHTML = students.map(s => `
+    <tr onclick="openStudentModal('${s.student_id}')">
+      <td style="padding-left:20px">
+        <div class="flex items-center gap-2" style="gap:12px">
+          ${avatarEl(s.student_name, s.fingerprint, 36)}
+          <div>
+            <div style="font-weight:600;font-size:14px">${s.student_name}</div>
+            <div class="text-xs text-muted">${s.student_id}</div>
+          </div>
+        </div>
+      </td>
+      <td class="text-sm text-muted">${s.topic}</td>
+      <td>${fpBadge(s.fingerprint)}</td>
+      <td>
+        <div class="drift-bar-wrap">
+          <div class="drift-bar-bg">
+            <div class="drift-bar-fill" style="width:${(s.drift_score||0)*100}%;background:${driftColor(s.drift_score)}"></div>
+          </div>
+          <span class="text-xs text-muted">${(s.drift_score||0).toFixed(2)}</span>
+        </div>
+      </td>
+      <td class="text-sm text-muted">${s.language||'—'}</td>
+      <td class="text-xs text-muted">${timeAgo(s.timestamp)}</td>
+      <td><button class="ctrl" style="font-size:12px;padding:4px 10px" onclick="event.stopPropagation();openStudentModal('${s.student_id}')">View →</button></td>
+    </tr>
+  `).join('');
+}
+
+function filterStudents() {
+  const q = document.getElementById('search-input').value.toLowerCase();
+  const filtered = q
+    ? allStudents.filter(s =>
+        (s.student_name||'').toLowerCase().includes(q) ||
+        (s.student_id||'').toLowerCase().includes(q) ||
+        (s.fingerprint||'').toLowerCase().includes(q) ||
+        (s.topic||'').toLowerCase().includes(q))
+    : allStudents;
+  renderStudentTable(filtered);
+}
+
+// ══════════════════════════════════════════════════════════════════
+// STUDENT DETAIL MODAL
+// ══════════════════════════════════════════════════════════════════
+async function openStudentModal(studentId) {
+  let s = allStudents.find(x => x.student_id === studentId);
+  if (!s) {
+    try {
+      const r = await fetch(`/api/student/${studentId}`);
+      s = await r.json();
+    } catch { return; }
+  }
+
+  const color = FP_COLORS[s.fingerprint] || '#6366f1';
+
+  // Header
+  document.getElementById('m-avatar').style.cssText = `background:${color}22;color:${color};border:2px solid ${color}`;
+  document.getElementById('m-avatar').textContent = initials(s.student_name||'?');
+  document.getElementById('m-name').textContent = s.student_name;
+  document.getElementById('m-meta').textContent = `${s.student_id} · ${s.topic} · ${s.language||'english'}`;
+  document.getElementById('m-badge').innerHTML = fpBadge(s.fingerprint) + `
+    <span style="margin-left:8px;font-size:12px;color:var(--muted)">drift: ${(s.drift_score||0).toFixed(2)}</span>`;
+
+  // Text info
+  document.getElementById('m-said').textContent = s.what_they_said || '—';
+  document.getElementById('m-wrong').textContent = s.what_is_wrong || '—';
+  document.getElementById('m-story').textContent = s.story_fix || '—';
+  document.getElementById('m-followup').textContent = s.follow_up_question || '—';
+  document.getElementById('m-peer').textContent = s.peer_suggestion || 'No peer match yet';
+
+  // Node chips
+  const activated = s.activated_nodes || [];
+  const skipped = s.skipped_nodes || [];
+  document.getElementById('m-activated').innerHTML = activated.length
+    ? activated.map(n => `<span class="chip" style="background:#10b98122;color:#10b981;border-color:#10b981">${n.replace(/_/g,' ')}</span>`).join('')
+    : '<span class="text-muted text-xs">None activated</span>';
+  document.getElementById('m-skipped').innerHTML = skipped.length
+    ? skipped.map(n => `<span class="chip" style="background:#ef444422;color:#ef4444;border-color:#ef4444">${n.replace(/_/g,' ')}</span>`).join('')
+    : '<span class="text-muted text-xs">None skipped</span>';
+
+  // Radar chart
+  const allNodes = [...new Set([...activated, ...skipped])];
+  const radarData = allNodes.map(n => activated.includes(n) ? 1 : 0);
+  renderRadarChart(allNodes, radarData, color);
+
+  // Drift gauge
+  renderDriftGauge(s.drift_score || 0);
+
+  // History chart
+  await loadHistoryChart(studentId);
+
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function renderRadarChart(labels, data, color) {
+  if (chartRadar) chartRadar.destroy();
+  const ctx = document.getElementById('chart-radar').getContext('2d');
+  chartRadar = new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels: labels.map(l => l.replace(/_/g,' ')),
+      datasets: [{
+        label: 'Activated',
+        data,
+        backgroundColor: color + '33',
+        borderColor: color,
+        borderWidth: 2,
+        pointBackgroundColor: data.map(v => v ? color : '#ef4444'),
+        pointRadius: 5,
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        r: {
+          beginAtZero: true, max: 1, min: 0,
+          ticks: { display: false },
+          grid: { color: '#1e293b' },
+          pointLabels: { color: '#94a3b8', font: { size: 10 } },
+          angleLines: { color: '#1e293b' }
+        }
+      },
+      plugins: { legend: { display: false } }
+    }
+  });
+}
+
+function renderDriftGauge(score) {
+  if (chartDriftGauge) chartDriftGauge.destroy();
+  const color = driftColor(score);
+  const ctx = document.getElementById('chart-drift-gauge').getContext('2d');
+  chartDriftGauge = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      datasets: [{
+        data: [score, 1 - score],
+        backgroundColor: [color, '#1e293b'],
+        borderWidth: 0,
+        circumference: 180,
+        rotation: 270,
+      }]
+    },
+    options: {
+      responsive: true,
+      cutout: '70%',
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: false },
+      }
+    },
+    plugins: [{
+      id: 'centerText',
+      afterDraw(chart) {
+        const { width, height, ctx } = chart;
+        ctx.restore();
+        ctx.font = `800 28px Inter,sans-serif`;
+        ctx.fillStyle = color;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText((score*100).toFixed(0) + '%', width/2, height*0.72);
+        ctx.font = `500 11px Inter,sans-serif`;
+        ctx.fillStyle = '#64748b';
+        ctx.fillText('DRIFT SCORE', width/2, height*0.85);
+        ctx.save();
+      }
+    }]
+  });
+}
+
+async function loadHistoryChart(studentId) {
+  if (chartHistory) chartHistory.destroy();
+  try {
+    const r = await fetch(`/api/student/${studentId}/history`);
+    const data = await r.json();
+    const history = data.history || [];
+
+    const histSection = document.getElementById('history-section');
+    if (history.length > 1) {
+      histSection.style.display = 'block';
+      const tbody = document.getElementById('history-tbody');
+      tbody.innerHTML = history.map(h => `
+        <tr>
+          <td>${timeAgo(h.timestamp)}</td>
+          <td>${h.topic}</td>
+          <td>${fpBadge(h.fingerprint)}</td>
+          <td>${(h.drift_score||0).toFixed(2)}</td>
+          <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)">${h.what_they_said||'—'}</td>
+        </tr>
+      `).join('');
+    } else {
+      histSection.style.display = 'none';
+    }
+
+    const ctx = document.getElementById('chart-history').getContext('2d');
+    if (history.length < 2) {
+      chartHistory = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['One submission'],
+          datasets: [{ data: [1], backgroundColor: ['#1e293b'], borderWidth: 0 }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            tooltip: { enabled: false },
+          }
+        },
+        plugins: [{
+          id: 'noData',
+          afterDraw(chart) {
+            const { width, height, ctx } = chart;
+            ctx.restore();
+            ctx.font = '12px Inter,sans-serif';
+            ctx.fillStyle = '#64748b';
+            ctx.textAlign = 'center';
+            ctx.fillText('Only one submission', width/2, height/2 - 6);
+            ctx.fillText('History appears after 2+', width/2, height/2 + 12);
+            ctx.save();
+          }
+        }]
+      });
+      return;
+    }
+
+    const labels = history.map(h => timeAgo(h.timestamp));
+    const drifts = history.map(h => h.drift_score || 0);
+    chartHistory = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Drift score',
+          data: drifts,
+          borderColor: '#6366f1',
+          backgroundColor: '#6366f122',
+          fill: true,
+          tension: 0.4,
+          pointBackgroundColor: drifts.map(driftColor),
+          pointRadius: 5,
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          x: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8', font: { size: 10 } } },
+          y: { min: 0, max: 1, grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' } }
+        },
+        plugins: { legend: { display: false } }
+      }
+    });
+  } catch {}
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modal-overlay')) closeModalBtn();
+}
+function closeModalBtn() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  if (chartRadar) { chartRadar.destroy(); chartRadar = null; }
+  if (chartDriftGauge) { chartDriftGauge.destroy(); chartDriftGauge = null; }
+  if (chartHistory) { chartHistory.destroy(); chartHistory = null; }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// WEBSOCKET — live updates
+// ══════════════════════════════════════════════════════════════════
+function connectWebSocket() {
+  const url = `ws://${location.host}/ws/dashboard`;
+  ws = new WebSocket(url);
+  ws.onopen = () => {
+    setDot('dot-ws', true);
+    document.getElementById('ws-label').textContent = 'Live';
+    document.getElementById('live-badge').style.display = 'flex';
+  };
+  ws.onclose = () => {
+    setDot('dot-ws', false);
+    document.getElementById('ws-label').textContent = 'Polling';
+    document.getElementById('live-badge').style.display = 'none';
+    setTimeout(connectWebSocket, 3000);
+  };
+  ws.onerror = () => ws.close();
+  ws.onmessage = (e) => {
+    const msg = JSON.parse(e.data);
+    if (msg.type === 'init') {
+      allStudents = msg.students || [];
+    } else if (msg.type === 'new_result') {
+      const idx = allStudents.findIndex(s => s.student_id === msg.data.student_id);
+      if (idx >= 0) allStudents[idx] = msg.data;
+      else allStudents.unshift(msg.data);
+    }
+    renderAll();
+  };
+}
+
+// ══════════════════════════════════════════════════════════════════
+// VAULT CHAT
+// ══════════════════════════════════════════════════════════════════
+async function sendChat() {
+  const input = document.getElementById('chat-input');
+  const q = input.value.trim();
+  if (!q) return;
+  input.value = '';
+  appendBubble('user', q);
+  document.getElementById('send-btn').disabled = true;
+  try {
+    const r = await fetch('/api/obsidian/query', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({query: q})
+    });
+    const data = await r.json();
+    appendBubble('ai', data.answer || 'No response.');
+  } catch {
+    appendBubble('ai', 'Could not reach Ollama. Make sure it is running.');
+  }
+  document.getElementById('send-btn').disabled = false;
+}
+
+function appendBubble(role, text) {
+  const wrap = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = `bubble ${role}`;
+  div.textContent = text;
+  wrap.appendChild(div);
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+async function reindexVault() {
+  appendBubble('sys', 'Re-indexing vault...');
+  try {
+    const r = await fetch('/api/obsidian/index', {method:'POST'});
+    const d = await r.json();
+    appendBubble('sys', `Indexed ${d.indexed} vault files.`);
+  } catch {
+    appendBubble('sys', 'Re-index failed — check OBSIDIAN_VAULT_PATH in .env');
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// CONTROLS
+// ══════════════════════════════════════════════════════════════════
+async function handleTopicChange(topic) {
+  document.getElementById('topic-select').value = topic;
+  document.getElementById('settings-topic').value = topic;
+  document.getElementById('topic-label').textContent = '— ' + topic.replace('_',' ');
+  try {
+    await fetch('/api/set-topic', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({topic, grade: 6})
+    });
+  } catch {}
+}
+
+async function clearSession() {
+  if (!confirm('Clear all student data for this session?')) return;
+  try {
+    await fetch('/api/session', {method:'DELETE'});
+    allStudents = [];
+    renderAll();
+  } catch {}
+}
+
+function exportCSV() {
+  const header = ['ID','Name','Topic','Fingerprint','Drift','Language','Timestamp'].join(',');
+  const rows = allStudents.map(s =>
+    [s.student_id, `"${s.student_name}"`, s.topic, s.fingerprint, s.drift_score, s.language, s.timestamp].join(',')
+  );
+  const blob = new Blob([[header,...rows].join('\n')], {type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `ark_session_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+function showTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if (name === 'students') renderStudentTable(allStudents);
+}
+
+// ══════════════════════════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════════════════════════
+function setDot(id, ok) {
+  const el = document.getElementById(id);
+  if (el) el.style.background = ok ? 'var(--green)' : '#ef4444';
+}
+
+function fpBadge(fp) {
+  const c = FP_COLORS[fp] || '#64748b';
+  return `<span class="fp-badge" style="background:${c}22;color:${c};border:1px solid ${c}">${fp||'—'}</span>`;
+}
+
+function avatarEl(name, fp, size) {
+  const c = FP_COLORS[fp] || '#6366f1';
+  const init = (name||'?').split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase();
+  return `<div class="avatar" style="width:${size}px;height:${size}px;background:${c}22;color:${c};border:2px solid ${c};font-size:${size*0.36}px">${init}</div>`;
+}
+
+function driftColor(score) {
+  if (score >= 0.7) return '#ef4444';
+  if (score >= 0.4) return '#f59e0b';
+  return '#10b981';
+}
+
+function initials(name) {
+  return (name||'?').split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase();
+}
+
+function timeAgo(ts) {
+  if (!ts) return '—';
+  const diff = Date.now() - new Date(ts);
+  if (diff < 60000) return 'just now';
+  if (diff < 3600000) return Math.floor(diff/60000) + 'm ago';
+  return new Date(ts).toLocaleTimeString();
+}
+</script>
+</body>
+</html>
