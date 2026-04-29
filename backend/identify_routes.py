@@ -134,6 +134,22 @@ async def identify(image: UploadFile = File(...)):
     image_bytes = await image.read()
     result = await asyncio.to_thread(_identify_sync, image_bytes)
 
+    # If face matched but no ARK student ID stored in access_control DB,
+    # try to find the student in the ARK database by name.
+    if result.get("access_granted") and not result.get("ark_id"):
+        try:
+            from app import mongo_svc
+            if await mongo_svc.is_available():
+                name = result.get("name", "")
+                doc = await mongo_svc.db.students.find_one(
+                    {"student_name": {"$regex": f"^{name}$", "$options": "i"}},
+                    {"student_id": 1},
+                )
+                if doc and doc.get("student_id"):
+                    result["ark_id"] = doc["student_id"]
+        except Exception:
+            pass
+
     # Mark attendance asynchronously if granted
     if result.get("access_granted"):
         asyncio.create_task(_mark_attendance_async(result))

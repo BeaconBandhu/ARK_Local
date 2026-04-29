@@ -35,11 +35,11 @@ echo.
 echo ============================================================
 echo  SUCCESS -- Other devices on the same WiFi can now access:
 echo.
-echo    Teacher Dashboard  :  http://192.168.31.18:8000/dashboard
-echo    Student Portal     :  http://192.168.31.18:8000/student
-echo    API Status Check   :  http://192.168.31.18:8000/api/status
+echo    Teacher Dashboard  :  http://10.13.231.31:8000/dashboard
+echo    Student Portal     :  http://10.13.231.31:8000/student
+echo    API Status Check   :  http://10.13.231.31:8000/api/status
 echo.
-echo  IMPORTANT: Other PCs must use the IP address above.
+echo  IP: 10.13.231.31  PORT: 8000  (locked -- do not change)
 echo  "localhost" only works on THIS computer.
 echo.
 echo  If the IP above does not work, run ipconfig in a terminal

@@ -140,6 +140,11 @@ button.ctrl.primary{background:var(--indigo);border-color:var(--indigo);color:#f
 .quiz-explanation{margin-top:8px;font-size:11px;color:var(--muted)}
 .ctrl-sm{background:var(--card);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:5px 8px;font-size:12px}
 
+/* DASH LANG BUTTONS */
+.dash-lang-btn{background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--muted);padding:6px 10px;font-size:12px;cursor:pointer;transition:all .15s;text-align:center}
+.dash-lang-btn:hover{color:var(--text);border-color:var(--indigo)}
+.dash-lang-btn.active{background:#6366f122;border-color:var(--indigo);color:var(--indigo);font-weight:600}
+
 /* LIVE BADGE */
 .live-badge{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--green)}
 .live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
@@ -150,6 +155,29 @@ button.ctrl.primary{background:var(--indigo);border-color:var(--indigo);color:#f
 .mt-1{margin-top:4px}.mt-2{margin-top:8px}.mt-3{margin-top:12px}.mb-1{margin-bottom:4px}.mb-2{margin-bottom:8px}
 .text-sm{font-size:13px}.text-xs{font-size:11px}.text-muted{color:var(--muted)}.font-bold{font-weight:700}
 .empty-state{text-align:center;padding:48px;color:var(--muted);font-size:14px}
+
+/* TOGGLE SWITCH */
+.toggle-wrap{display:flex;align-items:center;gap:7px}
+.toggle-switch{position:relative;display:inline-block;width:38px;height:21px;flex-shrink:0}
+.toggle-switch input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:var(--border);border-radius:21px;transition:.25s}
+.toggle-slider:before{position:absolute;content:"";height:15px;width:15px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.25s}
+.toggle-switch input:checked+.toggle-slider{background:var(--green)}
+.toggle-switch input:checked+.toggle-slider:before{transform:translateX(17px)}
+
+/* PEER SELECT */
+.peer-select{background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:4px 8px;font-size:12px;cursor:pointer;max-width:160px}
+.peer-select:focus{outline:none;border-color:var(--indigo)}
+
+/* SLOW LEARNER ADD PANEL */
+.sl-add-panel{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.sl-add-select{background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:7px 12px;font-size:13px;flex:1;min-width:200px;max-width:340px}
+.sl-add-select:focus{outline:none;border-color:var(--indigo)}
+.sl-add-btn{background:var(--indigo);border:none;color:#fff;padding:7px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
+.sl-add-btn:hover{opacity:.88}
+.sl-manual-badge{display:inline-flex;align-items:center;gap:4px;background:#6366f122;border:1px solid #6366f155;border-radius:5px;font-size:10px;color:var(--indigo);padding:2px 7px;font-weight:600;letter-spacing:.5px}
+.sl-remove-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;line-height:1;padding:2px 4px;border-radius:4px}
+.sl-remove-btn:hover{color:var(--red)}
 </style>
 </head>
 <body>
@@ -278,6 +306,9 @@ button.ctrl.primary{background:var(--indigo);border-color:var(--indigo);color:#f
     <div class="nav-item" onclick="showTab('content')">
       <span class="nav-icon">🧪</span> Content Lab
     </div>
+    <div class="nav-item" onclick="showTab('slowlearners')">
+      <span class="nav-icon">⚠️</span> Slow Learners
+    </div>
     <div class="nav-item" onclick="showTab('settings')">
       <span class="nav-icon">⚙️</span> Settings
     </div>
@@ -399,12 +430,14 @@ button.ctrl.primary{background:var(--indigo);border-color:var(--indigo);color:#f
               <th>Fingerprint</th>
               <th>Drift</th>
               <th>Language</th>
+              <th>Peer Assigned</th>
+              <th>Doubt</th>
               <th>Time</th>
               <th></th>
             </tr>
           </thead>
           <tbody id="student-tbody">
-            <tr><td colspan="7" class="empty-state">No students yet.</td></tr>
+            <tr><td colspan="9" class="empty-state">No students yet.</td></tr>
           </tbody>
         </table>
       </div>
@@ -463,6 +496,15 @@ button.ctrl.primary{background:var(--indigo);border-color:var(--indigo);color:#f
               <option value="food_chain">Food Chain</option>
             </select>
           </div>
+          <div style="margin-bottom:12px">
+            <label class="text-xs text-muted">Language</label>
+            <div style="display:flex;gap:6px;margin-top:6px">
+              <button class="dash-lang-btn active" data-lang="english"  onclick="setDashLang('english')" style="flex:1">🇬🇧 English</button>
+              <button class="dash-lang-btn"        data-lang="hindi"    onclick="setDashLang('hindi')"   style="flex:1">🇮🇳 Hindi</button>
+              <button class="dash-lang-btn"        data-lang="kannada"  onclick="setDashLang('kannada')" style="flex:1">ಕ Kannada</button>
+            </div>
+            <input type="hidden" id="cl-gen-lang" value="english">
+          </div>
           <div class="gen-row">
             <button class="gen-btn" id="btn-gen-notes" onclick="clGenerateNotes()">📝 Generate Notes</button>
           </div>
@@ -477,7 +519,7 @@ button.ctrl.primary{background:var(--indigo);border-color:var(--indigo);color:#f
           </div>
           <div id="cl-gen-status" class="text-xs text-muted" style="margin-top:10px"></div>
           <div class="text-xs text-muted" style="margin-top:6px;line-height:1.6">
-            Students see Notes on the <strong>Notes</strong> tab and Quiz on the <strong>Quiz</strong> tab. Powered by OpenAI.
+            Students see Notes &amp; Quiz in <strong>their selected language</strong>. Powered by OpenAI.
           </div>
         </div>
       </div>
@@ -540,6 +582,53 @@ button.ctrl.primary{background:var(--indigo);border-color:var(--indigo);color:#f
       <div class="card mt-3" style="margin-top:16px">
         <div class="card-title">Fingerprint Legend</div>
         <div id="fp-legend"></div>
+      </div>
+    </div>
+
+    <!-- ═══ SLOW LEARNERS TAB ═══ -->
+    <div class="tab" id="tab-slowlearners">
+      <div class="card" style="margin-bottom:16px;padding:14px 20px;border-left:4px solid var(--red)">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">
+          Slow Learners — INVERT &amp; ORPHAN
+        </div>
+        <div style="font-size:13px;color:var(--text);line-height:1.6">
+          Students with cause-effect reversed (INVERT) or missing prerequisite concepts (ORPHAN).
+          Assign a peer helper from the dropdown and enable visual doubt assistance using the toggle.
+        </div>
+      </div>
+
+      <!-- Add any student manually -->
+      <div class="card" style="margin-bottom:16px;padding:16px 20px">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">
+          Add student to slow learners list
+        </div>
+        <div class="sl-add-panel">
+          <select class="sl-add-select" id="sl-add-select">
+            <option value="">— Select a student —</option>
+          </select>
+          <button class="sl-add-btn" onclick="addManualSlowLearner()">Add to List</button>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:8px">
+          Use this to manually grant doubt access to any student regardless of their fingerprint.
+        </div>
+      </div>
+
+      <div class="card" style="padding:0;overflow:hidden">
+        <table class="student-table" id="sl-table">
+          <thead>
+            <tr>
+              <th style="padding-left:20px">Student</th>
+              <th>Fingerprint</th>
+              <th>Drift</th>
+              <th style="max-width:200px">What's Wrong</th>
+              <th>Peer Student</th>
+              <th>Doubt Access</th>
+            </tr>
+          </thead>
+          <tbody id="sl-tbody">
+            <tr><td colspan="6" class="empty-state">No INVERT or ORPHAN students detected yet.</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
@@ -638,6 +727,11 @@ let chartRadar = null;
 let chartDriftGauge = null;
 let chartHistory = null;
 
+// Peer assignments + doubt access (loaded from backend)
+let _peerAssignments    = {};   // student_id → {peer_id, peer_name}
+let _doubtAccess        = {};   // student_id → bool
+let _manualSlowLearners = [];   // student_ids manually added by teacher
+
 const FP_COLORS = {
   GHOST:'#f59e0b', INVERT:'#ef4444', HOLLOW:'#3b82f6',
   FRAGMENT:'#10b981', ORPHAN:'#8b5cf6'
@@ -657,9 +751,11 @@ window.addEventListener('DOMContentLoaded', () => {
   loadData();
   loadStatus();
   loadFPLegend();
+  loadPeerData();
   connectWebSocket();
   setInterval(loadData, 10000);
   setInterval(loadStatus, 15000);
+  setInterval(loadPeerData, 15000);
 });
 
 // ══════════════════════════════════════════════════════════════════
@@ -719,6 +815,7 @@ function renderAll() {
   renderActionItems();
   renderRecentFeed();
   renderStudentTable(allStudents);
+  renderSlowLearners();
 }
 
 async function loadAttendance() {
@@ -831,9 +928,25 @@ function renderStudentTable(students) {
   const tbody = document.getElementById('student-tbody');
   document.getElementById('student-count').textContent = `${students.length} student${students.length!==1?'s':''}`;
   if (!students.length) {
-    tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No students yet.</td></tr>'; return;
+    tbody.innerHTML = '<tr><td colspan="9" class="empty-state">No students yet.</td></tr>'; return;
   }
-  tbody.innerHTML = students.map(s => `
+  tbody.innerHTML = students.map(s => {
+    const isSlow    = s.fingerprint === 'INVERT' || s.fingerprint === 'ORPHAN';
+    const peerInfo  = _peerAssignments[s.student_id];
+    const peerCell  = peerInfo
+      ? `<span style="font-size:12px;color:var(--green)">👤 ${peerInfo.peer_name}</span>`
+      : (isSlow ? `<span class="text-xs text-muted" style="color:var(--amber)">— Assign in Slow Learners tab</span>` : '<span class="text-xs text-muted">—</span>');
+    const doubtAllowed = _doubtAccess[s.student_id] || false;
+    const doubtCell = isSlow
+      ? `<div class="toggle-wrap" onclick="event.stopPropagation()">
+           <label class="toggle-switch">
+             <input type="checkbox" ${doubtAllowed?'checked':''} onchange="toggleDoubtAccess('${s.student_id}',this.checked)">
+             <span class="toggle-slider"></span>
+           </label>
+           <span class="text-xs text-muted">${doubtAllowed?'On':'Off'}</span>
+         </div>`
+      : '<span class="text-xs text-muted">—</span>';
+    return `
     <tr onclick="openStudentModal('${s.student_id}')">
       <td style="padding-left:20px">
         <div class="flex items-center gap-2" style="gap:12px">
@@ -855,10 +968,12 @@ function renderStudentTable(students) {
         </div>
       </td>
       <td class="text-sm text-muted">${s.language||'—'}</td>
+      <td>${peerCell}</td>
+      <td>${doubtCell}</td>
       <td class="text-xs text-muted">${timeAgo(s.timestamp)}</td>
       <td><button class="ctrl" style="font-size:12px;padding:4px 10px" onclick="event.stopPropagation();openStudentModal('${s.student_id}')">View →</button></td>
-    </tr>
-  `).join('');
+    </tr>`;
+  }).join('');
 }
 
 function filterStudents() {
@@ -1149,8 +1264,16 @@ async function handleContentUpload(e) {
   e.target.value = '';
 }
 
+function setDashLang(lang) {
+  document.getElementById('cl-gen-lang').value = lang;
+  document.querySelectorAll('.dash-lang-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.lang === lang);
+  });
+}
+
 async function clGenerateNotes() {
-  const topic = document.getElementById('cl-gen-topic').value;
+  const topic    = document.getElementById('cl-gen-topic').value;
+  const language = document.getElementById('cl-gen-lang').value || 'english';
   const btn   = document.getElementById('btn-gen-notes');
   const st    = document.getElementById('cl-gen-status');
   btn.disabled = true; btn.textContent = 'Generating...';
@@ -1158,7 +1281,7 @@ async function clGenerateNotes() {
   try {
     const r = await fetch('/api/content/generate-notes', {
       method: 'POST', headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({topic})
+      body: JSON.stringify({topic, language})
     });
     if (!r.ok) { const t = await r.text(); throw new Error(t.slice(0,120)); }
     const d = await r.json();
@@ -1176,7 +1299,8 @@ async function clGenerateNotes() {
 }
 
 async function clGenerateQuiz() {
-  const topic = document.getElementById('cl-gen-topic').value;
+  const topic    = document.getElementById('cl-gen-topic').value;
+  const language = document.getElementById('cl-gen-lang').value || 'english';
   const n     = parseInt(document.getElementById('cl-quiz-count').value);
   const btn   = document.getElementById('btn-gen-quiz');
   const st    = document.getElementById('cl-gen-status');
@@ -1185,7 +1309,7 @@ async function clGenerateQuiz() {
   try {
     const r = await fetch('/api/content/generate-quiz', {
       method: 'POST', headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({topic, num_questions: n})
+      body: JSON.stringify({topic, num_questions: n, language})
     });
     if (!r.ok) { const t = await r.text(); throw new Error(t.slice(0,120)); }
     const d = await r.json();
@@ -1343,8 +1467,9 @@ function showTab(name) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
   event.currentTarget.classList.add('active');
-  if (name === 'students') renderStudentTable(allStudents);
-  if (name === 'content')  loadContentLabData();
+  if (name === 'students')     renderStudentTable(allStudents);
+  if (name === 'slowlearners') { loadPeerData().then(renderSlowLearners); }
+  if (name === 'content')      loadContentLabData();
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -1382,6 +1507,183 @@ function timeAgo(ts) {
   if (diff < 60000) return 'just now';
   if (diff < 3600000) return Math.floor(diff/60000) + 'm ago';
   return new Date(ts).toLocaleTimeString();
+}
+
+// ══════════════════════════════════════════════════════════════════
+// PEER ASSIGNMENT & DOUBT ACCESS
+// ══════════════════════════════════════════════════════════════════
+async function loadPeerData() {
+  try {
+    const [pa, da, ml] = await Promise.all([
+      fetch('/api/doubt/peer-assignments').then(r => r.json()),
+      fetch('/api/doubt/access-all').then(r => r.json()),
+      fetch('/api/doubt/manual-slow-learners').then(r => r.json()),
+    ]);
+    _peerAssignments    = pa.assignments || {};
+    _doubtAccess        = da || {};
+    _manualSlowLearners = ml.student_ids || [];
+  } catch (_) {}
+}
+
+async function toggleDoubtAccess(studentId, allowed) {
+  _doubtAccess[studentId] = allowed;
+  try {
+    await fetch(`/api/doubt/access/${studentId}`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ allowed }),
+    });
+  } catch (_) {}
+  renderStudentTable(allStudents);
+  renderSlowLearners();
+}
+
+async function handlePeerSelect(studentId, value) {
+  if (!value) return;
+  const sepIdx   = value.indexOf('|');
+  const peerId   = value.slice(0, sepIdx);
+  const peerName = value.slice(sepIdx + 1);
+  _peerAssignments[studentId] = { peer_id: peerId, peer_name: peerName };
+  try {
+    await fetch('/api/doubt/peer-assign', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ student_id: studentId, peer_id: peerId, peer_name: peerName }),
+    });
+  } catch (_) {}
+  renderStudentTable(allStudents);
+  renderSlowLearners();
+}
+
+function renderSlowLearners() {
+  const tbody = document.getElementById('sl-tbody');
+  if (!tbody) return;
+
+  // Auto-detected slow learners (INVERT / ORPHAN)
+  const autoIds  = new Set(
+    allStudents
+      .filter(s => s.fingerprint === 'INVERT' || s.fingerprint === 'ORPHAN')
+      .map(s => s.student_id)
+  );
+
+  // Manually added (exclude any already in autoIds to avoid duplicates)
+  const manualStudents = _manualSlowLearners
+    .filter(id => !autoIds.has(id))
+    .map(id => allStudents.find(s => s.student_id === id))
+    .filter(Boolean);
+
+  const autoStudents = allStudents.filter(s => autoIds.has(s.student_id));
+  const slowList     = [...autoStudents, ...manualStudents];
+  const slowIds      = new Set(slowList.map(s => s.student_id));
+
+  const peerPool = allStudents.filter(s => (s.drift_score || 1) < 0.3);
+
+  // Populate the add-student dropdown (only students NOT already in the list)
+  const addSel = document.getElementById('sl-add-select');
+  if (addSel) {
+    const prev = addSel.value;
+    addSel.innerHTML = '<option value="">— Select a student —</option>' +
+      allStudents
+        .filter(s => !slowIds.has(s.student_id))
+        .map(s => `<option value="${s.student_id}">${s.student_name} (${s.student_id})</option>`)
+        .join('');
+    addSel.value = prev;
+  }
+
+  if (!slowList.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No slow learners yet. Add students above or wait for INVERT / ORPHAN results.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = slowList.map(s => {
+    const isManual     = !autoIds.has(s.student_id);
+    const peerInfo     = _peerAssignments[s.student_id];
+    const doubtAllowed = _doubtAccess[s.student_id] || false;
+
+    const peerOpts = peerPool
+      .filter(p => p.student_id !== s.student_id)
+      .map(p => {
+        const sel = peerInfo && peerInfo.peer_id === p.student_id ? 'selected' : '';
+        return `<option value="${p.student_id}|${p.student_name}" ${sel}>${p.student_name}</option>`;
+      }).join('');
+
+    const peerCell = peerOpts
+      ? `<div>
+           <select class="peer-select" onchange="handlePeerSelect('${s.student_id}',this.value)">
+             <option value="">— Assign peer —</option>
+             ${peerOpts}
+           </select>
+           ${peerInfo ? `<div class="text-xs text-muted" style="margin-top:4px">👤 ${peerInfo.peer_name}</div>` : ''}
+         </div>`
+      : `<span class="text-xs text-muted" style="color:var(--amber)">No strong students yet</span>`;
+
+    const nameCell = isManual
+      ? `<div style="display:flex;align-items:center;gap:7px">
+           <div>
+             <div style="font-weight:600;font-size:14px">${s.student_name}</div>
+             <div class="text-xs text-muted">${s.student_id}</div>
+           </div>
+           <span class="sl-manual-badge">Manual</span>
+           <button class="sl-remove-btn" title="Remove from list"
+             onclick="removeManualSlowLearner('${s.student_id}')">✕</button>
+         </div>`
+      : `<div style="font-weight:600;font-size:14px">${s.student_name}</div>
+         <div class="text-xs text-muted">${s.student_id}</div>`;
+
+    return `<tr>
+      <td style="padding-left:20px">${nameCell}</td>
+      <td>${fpBadge(s.fingerprint || '—')}</td>
+      <td>
+        <div class="drift-bar-wrap">
+          <div class="drift-bar-bg">
+            <div class="drift-bar-fill" style="width:${(s.drift_score||0)*100}%;background:${driftColor(s.drift_score)}"></div>
+          </div>
+          <span class="text-xs text-muted">${(s.drift_score||0).toFixed(2)}</span>
+        </div>
+      </td>
+      <td style="max-width:200px;font-size:12px;color:var(--muted);overflow:hidden;
+                 text-overflow:ellipsis;white-space:nowrap" title="${(s.what_is_wrong||'').replace(/"/g,'&quot;')}">
+        ${s.what_is_wrong || '—'}
+      </td>
+      <td>${peerCell}</td>
+      <td>
+        <div class="toggle-wrap">
+          <label class="toggle-switch">
+            <input type="checkbox" ${doubtAllowed?'checked':''}
+              onchange="toggleDoubtAccess('${s.student_id}',this.checked)">
+            <span class="toggle-slider"></span>
+          </label>
+          <span class="text-xs text-muted">${doubtAllowed ? 'Enabled' : 'Disabled'}</span>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+async function addManualSlowLearner() {
+  const sel = document.getElementById('sl-add-select');
+  const sid = sel ? sel.value : '';
+  if (!sid) return;
+  if (!_manualSlowLearners.includes(sid)) {
+    _manualSlowLearners.push(sid);
+  }
+  try {
+    await fetch('/api/doubt/manual-slow-learners', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ student_id: sid }),
+    });
+  } catch (_) {}
+  if (sel) sel.value = '';
+  renderSlowLearners();
+}
+
+async function removeManualSlowLearner(studentId) {
+  _manualSlowLearners = _manualSlowLearners.filter(id => id !== studentId);
+  try {
+    await fetch(`/api/doubt/manual-slow-learners/${studentId}`, { method: 'DELETE' });
+  } catch (_) {}
+  renderSlowLearners();
 }
 </script>
 </body>

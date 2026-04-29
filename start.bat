@@ -19,14 +19,17 @@ start "ARK Student App" cmd /k "cd /d C:\Users\Aranya\Pictures\ARK\mobile && %NP
 timeout /t 5 /nobreak >nul
 
 echo Opening teacher dashboard...
-start "" "http://localhost:8000/dashboard"
+start "" "http://10.13.231.31:8000/dashboard"
 
 echo.
 echo ================================================
 echo   ARK is running!
 echo.
-echo   Teacher dashboard : http://localhost:8000/dashboard
+echo   Teacher dashboard : http://10.13.231.31:8000/dashboard
+echo   Student portal    : http://10.13.231.31:8000/student
 echo   Student mobile    : Scan QR in the Expo window
 echo                       with Expo Go app on phone
+echo.
+echo   Server IP : 10.13.231.31   PORT : 8000  (locked)
 echo ================================================
 pause

@@ -67,10 +67,12 @@ from dashboard_routes import router as dashboard_router
 from content_routes import router as content_router
 from attendance_routes import router as attendance_router
 from identify_routes import router as identify_router
+from doubt_routes import router as doubt_router
 app.include_router(dashboard_router)
 app.include_router(content_router)
 app.include_router(attendance_router)
 app.include_router(identify_router)
+app.include_router(doubt_router)
 
 CORS_ORIGINS = os.getenv("CORS_ORIGINS", "*").split(",")
 app.add_middleware(

@@ -72,10 +72,12 @@
     .lang-strip { display: flex; gap: 3px; flex-shrink: 0; }
     .lang-btn {
       border: 1px solid var(--border); background: var(--accent); color: var(--muted);
-      border-radius: 6px; padding: 4px 7px; cursor: pointer;
-      font-size: 0.72rem; font-weight: 700; line-height: 1; transition: all .15s;
+      border-radius: 8px; padding: 6px 10px; cursor: pointer;
+      font-size: 0.78rem; font-weight: 700; line-height: 1; transition: all .15s;
     }
     .lang-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    /* Smaller variant inside header strip */
+    .lang-strip .lang-btn { padding: 4px 7px; font-size: 0.72rem; border-radius: 6px; }
 
     main { flex: 1; overflow-y: auto; padding: 0 0 80px 0; }
 
@@ -235,6 +237,36 @@
       #screen-app { max-width: 600px; margin: 0 auto; }
       .bottom-nav { max-width: 600px; left: 50%; transform: translateX(-50%); }
     }
+
+    /* ── DOUBT HELP CARD ── */
+    .doubt-card {
+      background: linear-gradient(135deg, rgba(139,92,246,.07), rgba(239,68,68,.05));
+      border: 1px solid rgba(139,92,246,.35) !important;
+    }
+    .doubt-type-row { display: flex; gap: 8px; margin-bottom: 12px; }
+    .doubt-type-btn {
+      flex: 1; padding: 11px 6px; border-radius: 12px; border: 1px solid var(--border);
+      background: var(--accent); color: var(--text); font-size: .82rem; cursor: pointer;
+      transition: all .2s; text-align: center; font-weight: 600;
+    }
+    .doubt-type-btn.active {
+      background: rgba(139,92,246,.2); border-color: var(--orphan); color: var(--orphan);
+    }
+    .doubt-gen-btn {
+      width: 100%; background: var(--orphan); color: #fff; border: none;
+      border-radius: 12px; padding: 13px; font-size: .95rem; font-weight: 700;
+      cursor: pointer; transition: opacity .2s; margin-top: 4px;
+    }
+    .doubt-gen-btn:disabled { opacity: .5; cursor: not-allowed; }
+    .doubt-output {
+      background: var(--accent); border: 1px solid var(--border); border-radius: 12px;
+      padding: 16px; font-size: .88rem; line-height: 1.9; white-space: pre-wrap;
+      margin-top: 12px; min-height: 80px; font-family: inherit;
+    }
+    .doubt-image {
+      width: 100%; border-radius: 12px; border: 1px solid var(--border);
+      margin-top: 12px; display: block; background: var(--accent);
+    }
   </style>
 </head>
 <body>
@@ -324,6 +356,14 @@
 <div id="screen-login" class="screen">
   <div class="login-box">
     <div class="login-logo">ARK</div>
+
+    <!-- Language picker — visible on login screen -->
+    <div style="display:flex;gap:6px;justify-content:center;margin-bottom:4px">
+      <button class="lang-btn active" id="login-lang-en" data-lang="en" onclick="setLang('en')">EN — English</button>
+      <button class="lang-btn"        id="login-lang-hi" data-lang="hi" onclick="setLang('hi')">हि — हिंदी</button>
+      <button class="lang-btn"        id="login-lang-kn" data-lang="kn" onclick="setLang('kn')">ಕ — ಕನ್ನಡ</button>
+    </div>
+
     <p class="login-subtitle" data-i18n="login_subtitle">Classroom Comprehension System</p>
 
     <input id="inp-id"   type="text" data-i18n="login_id_ph" data-i18n-attr="placeholder" placeholder="Student ID  (e.g. S01)" autocomplete="off" />
@@ -506,6 +546,39 @@
           </p>
           <div id="classmates-grid"></div>
         </div>
+
+        <!-- DOUBT HELP CARD — INVERT / ORPHAN only, teacher-unlocked -->
+        <div class="s-card doubt-card" id="doubt-card" hidden>
+          <h4 style="color:var(--orphan)" data-i18n="doubt_title">Get Visual Help</h4>
+          <p style="font-size:.8rem;color:var(--muted);margin-bottom:14px" data-i18n="doubt_subtitle">Your teacher has unlocked visual doubt assistance for you.</p>
+
+          <div class="doubt-type-row">
+            <button class="doubt-type-btn active" id="doubt-btn-fc"
+              onclick="selectDoubtType('flowchart')" data-i18n="doubt_flowchart">🔀 Step-by-Step Flowchart</button>
+            <button class="doubt-type-btn" id="doubt-btn-pic"
+              onclick="selectDoubtType('pictorial')" data-i18n="doubt_pictorial">🖼 Pictorial Diagram</button>
+          </div>
+
+          <div style="font-size:.78rem;color:var(--muted);margin-bottom:6px" data-i18n="doubt_lang_label">Explanation Language</div>
+          <div style="display:flex;gap:6px;margin-bottom:14px">
+            <button class="lang-btn active" data-dlang="english" onclick="setDoubtLang('english')">EN</button>
+            <button class="lang-btn"        data-dlang="hindi"   onclick="setDoubtLang('hindi')">हि</button>
+            <button class="lang-btn"        data-dlang="kannada" onclick="setDoubtLang('kannada')">ಕ</button>
+          </div>
+
+          <button class="doubt-gen-btn" id="doubt-gen-btn" onclick="generateDoubt()"
+            data-i18n="doubt_generate">Generate Explanation →</button>
+
+          <div id="doubt-output-wrap" hidden>
+            <div style="font-size:.75rem;color:var(--muted);margin-top:14px;margin-bottom:6px;
+                        text-transform:uppercase;letter-spacing:.5px" data-i18n="doubt_result_ttl">
+              Your Visual Explanation
+            </div>
+            <div class="doubt-output" id="doubt-output"></div>
+            <img id="doubt-image" class="doubt-image" alt="Visual explanation" hidden />
+          </div>
+        </div>
+
       </div>
     </section>
 
@@ -672,6 +745,14 @@ const STRINGS = {
     signout_confirm: 'Sign out? Your progress is saved on the server.',
     lang_prefix_hi:  '',
     lang_prefix_kn:  '',
+    doubt_title:     'Get Visual Help',
+    doubt_subtitle:  'Your teacher has unlocked visual doubt assistance for you.',
+    doubt_flowchart: '🔀 Step-by-Step Flowchart',
+    doubt_pictorial: '🖼 Pictorial Diagram',
+    doubt_lang_label:'Explanation Language',
+    doubt_generate:  'Generate Explanation →',
+    doubt_generating:'Generating your visual explanation…',
+    doubt_result_ttl:'Your Visual Explanation',
   },
   hi: {
     login_subtitle:  'कक्षा बोध प्रणाली',
@@ -737,6 +818,14 @@ const STRINGS = {
     quiz_ask_teacher:'प्रश्नोत्तरी स्वचालित रूप से नहीं बन सकी। अपने शिक्षक से बनाने के लिए कहें।',
     unanswered:      '{n} प्रश्न अनुत्तरित हैं। फिर भी जमा करें?',
     signout_confirm: 'बाहर जाएं? आपकी प्रगति सर्वर पर सुरक्षित है।',
+    doubt_title:     'दृश्य सहायता प्राप्त करें',
+    doubt_subtitle:  'आपके शिक्षक ने आपके लिए दृश्य संदेह सहायता अनलॉक की है।',
+    doubt_flowchart: '🔀 चरण-दर-चरण फ्लोचार्ट',
+    doubt_pictorial: '🖼 चित्रात्मक आरेख',
+    doubt_lang_label:'स्पष्टीकरण भाषा',
+    doubt_generate:  'स्पष्टीकरण बनाएं →',
+    doubt_generating:'आपका दृश्य स्पष्टीकरण बन रहा है…',
+    doubt_result_ttl:'आपका दृश्य स्पष्टीकरण',
   },
   kn: {
     login_subtitle:  'ತರಗತಿ ಗ್ರಹಿಕಾ ವ್ಯವಸ್ಥೆ',
@@ -802,6 +891,14 @@ const STRINGS = {
     quiz_ask_teacher:'ರಸಪ್ರಶ್ನೆ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ರಚಿಸಲಾಗಲಿಲ್ಲ. ಶಿಕ್ಷಕರನ್ನು ರಚಿಸಲು ಕೇಳಿ.',
     unanswered:      '{n} ಪ್ರಶ್ನೆಗಳಿಗೆ ಉತ್ತರ ನೀಡಿಲ್ಲ. ಸಲ್ಲಿಸುವುದೇ?',
     signout_confirm: 'ನಿರ್ಗಮಿಸುವುದೇ? ನಿಮ್ಮ ಪ್ರಗತಿ ಸರ್ವರ್‌ನಲ್ಲಿ ಉಳಿಸಲ್ಪಟ್ಟಿದೆ.',
+    doubt_title:     'ದೃಶ್ಯ ಸಹಾಯ ಪಡೆಯಿರಿ',
+    doubt_subtitle:  'ನಿಮ್ಮ ಶಿಕ್ಷಕರು ನಿಮಗಾಗಿ ದೃಶ್ಯ ಸಂದೇಹ ಸಹಾಯ ತೆರೆದಿದ್ದಾರೆ.',
+    doubt_flowchart: '🔀 ಹಂತ-ಹಂತ ಫ್ಲೋಚಾರ್ಟ್',
+    doubt_pictorial: '🖼 ಚಿತ್ರ ರೇಖಾಚಿತ್ರ',
+    doubt_lang_label:'ವಿವರಣೆ ಭಾಷೆ',
+    doubt_generate:  'ವಿವರಣೆ ರಚಿಸಿ →',
+    doubt_generating:'ನಿಮ್ಮ ದೃಶ್ಯ ವಿವರಣೆ ರಚಿಸಲಾಗುತ್ತಿದೆ…',
+    doubt_result_ttl:'ನಿಮ್ಮ ದೃಶ್ಯ ವಿವರಣೆ',
   },
 };
 
@@ -854,7 +951,7 @@ function setLang(lang) {
     if (attr) el.setAttribute(attr, val);
     else      el.textContent = val;
   });
-  // Sync lang picker buttons
+  // Sync ALL lang picker buttons (login screen + app header)
   document.querySelectorAll('.lang-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.lang === lang);
   });
@@ -909,6 +1006,7 @@ if (_autoName) {
     student = { id: _autoId, name: _decodedName };
     localStorage.setItem('ark_student', JSON.stringify(student));
   } else {
+    // Face recognised but no ARK ID enrolled — pre-fill name and focus ID field
     document.getElementById('inp-name').value = _decodedName;
     document.getElementById('inp-id').focus();
   }
@@ -916,10 +1014,19 @@ if (_autoName) {
 }
 
 const savedStudent = localStorage.getItem('ark_student');
-if (savedStudent) { student = JSON.parse(savedStudent); showApp(); }
+if (savedStudent && !student) { student = JSON.parse(savedStudent); }
 
+// Load last result BEFORE showApp() so renderResult() can use it immediately.
+// Only use the cached result if it belongs to the current student.
 const savedResult = localStorage.getItem('ark_last_result');
-if (savedResult) { lastResult = JSON.parse(savedResult); }
+if (savedResult && student) {
+  try {
+    const _parsed = JSON.parse(savedResult);
+    if (_parsed.student_id === student.id) lastResult = _parsed;
+  } catch (_) {}
+}
+
+if (student) showApp();
 
 // ══════════════════════════════════════════════
 // AUTH
@@ -1072,6 +1179,7 @@ function renderResult(data) {
   document.getElementById('res-followup').textContent = data.follow_up_question || rem.follow_up_question || '—';
 
   if (data.topic) loadClassmates(data.topic, data.fingerprint);
+  checkDoubtAccess(student ? student.id : null, fp);
 }
 
 function makeChip(name, cls, icon) {
@@ -1540,6 +1648,94 @@ async function sendChat() {
 }
 
 document.getElementById('chat-inp').addEventListener('keydown', e => { if (e.key === 'Enter') sendChat(); });
+
+// ══════════════════════════════════════════════
+// DOUBT HELP — INVERT / ORPHAN visual assistance
+// ══════════════════════════════════════════════
+let _doubtType = 'flowchart';
+let _doubtLang = 'english';
+
+function selectDoubtType(type) {
+  _doubtType = type;
+  document.getElementById('doubt-btn-fc').classList.toggle('active',  type === 'flowchart');
+  document.getElementById('doubt-btn-pic').classList.toggle('active', type === 'pictorial');
+  document.getElementById('doubt-output-wrap').hidden = true;
+  const img = document.getElementById('doubt-image');
+  if (img) { img.src = ''; img.hidden = true; }
+}
+
+function setDoubtLang(lang) {
+  _doubtLang = lang;
+  document.querySelectorAll('[data-dlang]').forEach(b => {
+    b.classList.toggle('active', b.dataset.dlang === lang);
+  });
+  document.getElementById('doubt-output-wrap').hidden = true;
+  const img = document.getElementById('doubt-image');
+  if (img) { img.src = ''; img.hidden = true; }
+}
+
+async function checkDoubtAccess(studentId, fingerprint) {
+  const card = document.getElementById('doubt-card');
+  if (!card) return;
+  if (!studentId) { card.hidden = true; return; }
+  try {
+    const r = await fetch(`${SERVER}/api/doubt/access/${studentId}`);
+    const d = await r.json();
+    card.hidden = !d.allowed;
+    if (d.allowed) {
+      card.querySelectorAll('[data-i18n]').forEach(el => {
+        el.textContent = T(el.dataset.i18n);
+      });
+    }
+  } catch (_) { card.hidden = true; }
+}
+
+async function generateDoubt() {
+  if (!lastResult) return;
+  const btn    = document.getElementById('doubt-gen-btn');
+  const output = document.getElementById('doubt-output');
+  const img    = document.getElementById('doubt-image');
+  const wrap   = document.getElementById('doubt-output-wrap');
+
+  btn.disabled    = true;
+  btn.textContent = T('doubt_generating');
+  wrap.hidden     = false;
+  output.textContent = T('doubt_generating');
+  output.hidden   = false;
+  img.hidden      = true;
+
+  try {
+    const r = await fetch(`${SERVER}/api/doubt/generate`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        student_id:    student ? student.id : '',
+        topic:         lastResult.topic        || 'photosynthesis',
+        fingerprint:   lastResult.fingerprint  || 'INVERT',
+        doubt_type:    _doubtType,
+        language:      _doubtLang,
+        what_is_wrong: lastResult.what_is_wrong || '',
+      }),
+    });
+    const d = await r.json();
+    if (d.image_url) {
+      output.hidden   = true;
+      img.src         = d.image_url;
+      img.hidden      = false;
+    } else {
+      img.hidden      = true;
+      output.hidden   = false;
+      output.textContent = d.explanation || 'Could not generate explanation.';
+    }
+  } catch (_) {
+    img.hidden         = true;
+    output.hidden      = false;
+    output.textContent = 'Could not reach the server. Please try again.';
+  } finally {
+    btn.disabled    = false;
+    btn.textContent = T('doubt_generate');
+  }
+}
 </script>
 </body>
 </html>
