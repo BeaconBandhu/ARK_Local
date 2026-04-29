@@ -124,6 +124,22 @@ button.ctrl.primary{background:var(--indigo);border-color:var(--indigo);color:#f
 .setting-label{font-size:14px;font-weight:500}
 .setting-desc{font-size:12px;color:var(--muted);margin-top:2px}
 
+/* CONTENT LAB */
+.upload-zone{border:2px dashed var(--border);border-radius:12px;padding:28px;text-align:center;cursor:pointer;font-size:14px;color:var(--muted);transition:all .2s;margin-bottom:12px}
+.upload-zone:hover{border-color:var(--indigo);color:var(--text)}
+.gen-row{display:flex;gap:8px;margin-top:12px}
+.gen-btn{flex:1;background:var(--indigo);border:none;color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;transition:opacity .2s}
+.gen-btn:disabled{opacity:.5;cursor:not-allowed}
+.gen-btn.secondary{background:var(--card);border:1px solid var(--border);color:var(--text)}
+.notes-box{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:18px;font-size:13px;line-height:1.9;white-space:pre-wrap;max-height:400px;overflow-y:auto}
+.quiz-q-card{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px}
+.quiz-q-text{font-weight:600;font-size:13px;margin-bottom:10px;line-height:1.5}
+.quiz-opts-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.quiz-opt-card{padding:8px 12px;border-radius:8px;font-size:12px;border:1px solid var(--border);background:var(--surface)}
+.quiz-opt-card.correct-opt{background:#10b98122;border-color:#10b981;color:#10b981;font-weight:600}
+.quiz-explanation{margin-top:8px;font-size:11px;color:var(--muted)}
+.ctrl-sm{background:var(--card);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:5px 8px;font-size:12px}
+
 /* LIVE BADGE */
 .live-badge{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--green)}
 .live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
@@ -150,6 +166,9 @@ button.ctrl.primary{background:var(--indigo);border-color:var(--indigo);color:#f
     </div>
     <div class="nav-item" onclick="showTab('chat')">
       <span class="nav-icon">💬</span> Vault Chat
+    </div>
+    <div class="nav-item" onclick="showTab('content')">
+      <span class="nav-icon">🧪</span> Content Lab
     </div>
     <div class="nav-item" onclick="showTab('settings')">
       <span class="nav-icon">⚙️</span> Settings
@@ -281,6 +300,79 @@ button.ctrl.primary{background:var(--indigo);border-color:var(--indigo);color:#f
             onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}"></textarea>
           <button class="send-btn" id="send-btn" onclick="sendChat()">Send</button>
         </div>
+      </div>
+    </div>
+
+    <!-- ═══ CONTENT LAB TAB ═══ -->
+    <div class="tab" id="tab-content">
+      <div class="grid-2" style="margin-bottom:20px">
+
+        <!-- Upload reference file -->
+        <div class="card">
+          <div class="card-title">Upload Reference Material</div>
+          <div class="upload-zone" onclick="document.getElementById('cl-file-input').click()">
+            <div style="font-size:24px;margin-bottom:6px">📄</div>
+            <div>Drop PDF, Word (.docx) or TXT here</div>
+            <div class="text-xs text-muted" style="margin-top:4px">Click to browse · max 8000 chars indexed</div>
+            <input type="file" id="cl-file-input" hidden accept=".pdf,.docx,.txt,.md" onchange="handleContentUpload(event)"/>
+          </div>
+          <div style="margin-bottom:8px">
+            <label class="text-xs text-muted">Assign to topic</label>
+            <select id="cl-upload-topic" class="ctrl" style="width:100%;margin-top:4px">
+              <option value="photosynthesis">Photosynthesis</option>
+              <option value="water_cycle">Water Cycle</option>
+              <option value="food_chain">Food Chain</option>
+            </select>
+          </div>
+          <div id="cl-upload-status" class="text-xs text-muted"></div>
+        </div>
+
+        <!-- Generate controls -->
+        <div class="card">
+          <div class="card-title">Generate Content with AI</div>
+          <div style="margin-bottom:10px">
+            <label class="text-xs text-muted">Topic</label>
+            <select id="cl-gen-topic" class="ctrl" style="width:100%;margin-top:4px">
+              <option value="photosynthesis">Photosynthesis</option>
+              <option value="water_cycle">Water Cycle</option>
+              <option value="food_chain">Food Chain</option>
+            </select>
+          </div>
+          <div class="gen-row">
+            <button class="gen-btn" id="btn-gen-notes" onclick="clGenerateNotes()">📝 Generate Notes</button>
+          </div>
+          <div class="gen-row" style="margin-top:8px">
+            <select id="cl-quiz-count" class="ctrl ctrl-sm">
+              <option value="3">3 Q</option>
+              <option value="5" selected>5 Q</option>
+              <option value="8">8 Q</option>
+              <option value="10">10 Q</option>
+            </select>
+            <button class="gen-btn" id="btn-gen-quiz" onclick="clGenerateQuiz()" style="flex:1">❓ Generate Quiz</button>
+          </div>
+          <div id="cl-gen-status" class="text-xs text-muted" style="margin-top:10px"></div>
+          <div class="text-xs text-muted" style="margin-top:6px;line-height:1.6">
+            Students see Notes on the <strong>Notes</strong> tab and Quiz on the <strong>Quiz</strong> tab. Takes 30-60s per generation.
+          </div>
+        </div>
+      </div>
+
+      <!-- Generated Notes -->
+      <div class="card" id="cl-notes-card" style="display:none;margin-bottom:20px">
+        <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+          <span>Study Notes — <span id="cl-notes-topic"></span></span>
+          <span class="text-xs text-muted" id="cl-notes-ts"></span>
+        </div>
+        <div class="notes-box" id="cl-notes-text"></div>
+      </div>
+
+      <!-- Generated Quiz -->
+      <div class="card" id="cl-quiz-card" style="display:none">
+        <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+          <span>MCQ Quiz — <span id="cl-quiz-topic"></span> &nbsp;<span class="text-muted text-xs" id="cl-quiz-count-lbl"></span></span>
+          <span class="text-xs text-muted" id="cl-quiz-ts"></span>
+        </div>
+        <div id="cl-quiz-list"></div>
       </div>
     </div>
 
@@ -510,7 +602,7 @@ function renderMetrics() {
   const critical = allStudents.filter(s => s.drift_score >= 0.7).length;
   const avgDrift = n ? (allStudents.reduce((a,s) => a + (s.drift_score||0), 0) / n).toFixed(2) : '—';
 
-  document.getElementById('m-answered').textContent = `${n}/30`;
+  document.getElementById('m-answered').textContent = `${n}`;
   document.getElementById('m-understood').textContent = understood;
   document.getElementById('m-critical').textContent = critical;
   document.getElementById('m-drift').textContent = avgDrift;
@@ -894,6 +986,128 @@ function connectWebSocket() {
 }
 
 // ══════════════════════════════════════════════════════════════════
+// CONTENT LAB
+// ══════════════════════════════════════════════════════════════════
+async function handleContentUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const topic = document.getElementById('cl-upload-topic').value;
+  const el    = document.getElementById('cl-upload-status');
+  el.textContent = 'Uploading...';
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('topic', topic);
+  try {
+    const r = await fetch('/api/content/upload', {method: 'POST', body: fd});
+    const d = await r.json();
+    el.textContent = `Uploaded ${file.name} — ${d.chars} chars indexed for topic: ${topic}`;
+  } catch (err) {
+    el.textContent = 'Upload failed: ' + err.message;
+  }
+  e.target.value = '';
+}
+
+async function clGenerateNotes() {
+  const topic = document.getElementById('cl-gen-topic').value;
+  const btn   = document.getElementById('btn-gen-notes');
+  const st    = document.getElementById('cl-gen-status');
+  btn.disabled = true; btn.textContent = 'Generating...';
+  st.textContent = 'Asking Ollama to write study notes... (30-60s)';
+  try {
+    const r = await fetch('/api/content/generate-notes', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({topic})
+    });
+    const d = await r.json();
+    if (d.error) throw new Error(d.error);
+    document.getElementById('cl-notes-card').style.display = 'block';
+    document.getElementById('cl-notes-topic').textContent  = topic.replace(/_/g,' ');
+    document.getElementById('cl-notes-text').textContent   = d.notes || '—';
+    document.getElementById('cl-notes-ts').textContent     = new Date(d.generated_at).toLocaleString();
+    st.textContent = 'Notes ready! Students can view them on the Notes tab.';
+  } catch (err) {
+    st.textContent = 'Error: ' + err.message;
+  } finally {
+    btn.disabled = false; btn.textContent = 'Generate Notes';
+  }
+}
+
+async function clGenerateQuiz() {
+  const topic = document.getElementById('cl-gen-topic').value;
+  const n     = parseInt(document.getElementById('cl-quiz-count').value);
+  const btn   = document.getElementById('btn-gen-quiz');
+  const st    = document.getElementById('cl-gen-status');
+  btn.disabled = true; btn.textContent = 'Generating...';
+  st.textContent = `Asking Ollama to create ${n} MCQ questions... (30-60s)`;
+  try {
+    const r = await fetch('/api/content/generate-quiz', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({topic, num_questions: n})
+    });
+    const d = await r.json();
+    if (d.error) throw new Error(d.error);
+    const qs = d.questions || [];
+    document.getElementById('cl-quiz-card').style.display  = 'block';
+    document.getElementById('cl-quiz-topic').textContent   = topic.replace(/_/g,' ');
+    document.getElementById('cl-quiz-count-lbl').textContent = `(${qs.length} questions)`;
+    document.getElementById('cl-quiz-ts').textContent      = new Date(d.generated_at).toLocaleString();
+    document.getElementById('cl-quiz-list').innerHTML = qs.map((q, i) => `
+      <div class="quiz-q-card">
+        <div class="quiz-q-text">Q${i+1}. ${q.question}</div>
+        <div class="quiz-opts-grid">
+          ${q.options.map((opt, j) => `
+            <div class="quiz-opt-card ${j === q.correct ? 'correct-opt' : ''}">
+              ${'ABCD'[j]}. ${opt}
+            </div>`).join('')}
+        </div>
+        ${q.explanation ? `<div class="quiz-explanation">Explanation: ${q.explanation}</div>` : ''}
+      </div>`).join('');
+    st.textContent = `${qs.length} questions ready! Students can take the quiz on their portal.`;
+  } catch (err) {
+    st.textContent = 'Error: ' + err.message;
+  } finally {
+    btn.disabled = false; btn.textContent = 'Generate Quiz';
+  }
+}
+
+// Auto-load existing notes/quiz when switching to Content Lab tab
+async function loadContentLabData() {
+  const topic = document.getElementById('cl-gen-topic').value;
+  try {
+    const [nr, qr] = await Promise.all([
+      fetch(`/api/content/notes/${topic}`),
+      fetch(`/api/content/quiz/${topic}`)
+    ]);
+    const nd = await nr.json();
+    const qd = await qr.json();
+    if (nd.notes) {
+      document.getElementById('cl-notes-card').style.display = 'block';
+      document.getElementById('cl-notes-topic').textContent  = topic.replace(/_/g,' ');
+      document.getElementById('cl-notes-text').textContent   = nd.notes;
+      document.getElementById('cl-notes-ts').textContent     = new Date(nd.generated_at).toLocaleString();
+    }
+    if (qd.questions?.length) {
+      const qs = qd.questions;
+      document.getElementById('cl-quiz-card').style.display    = 'block';
+      document.getElementById('cl-quiz-topic').textContent     = topic.replace(/_/g,' ');
+      document.getElementById('cl-quiz-count-lbl').textContent = `(${qs.length} questions)`;
+      document.getElementById('cl-quiz-ts').textContent        = new Date(qd.generated_at).toLocaleString();
+      document.getElementById('cl-quiz-list').innerHTML = qs.map((q, i) => `
+        <div class="quiz-q-card">
+          <div class="quiz-q-text">Q${i+1}. ${q.question}</div>
+          <div class="quiz-opts-grid">
+            ${q.options.map((opt, j) => `
+              <div class="quiz-opt-card ${j === q.correct ? 'correct-opt' : ''}">
+                ${'ABCD'[j]}. ${opt}
+              </div>`).join('')}
+          </div>
+          ${q.explanation ? `<div class="quiz-explanation">Explanation: ${q.explanation}</div>` : ''}
+        </div>`).join('');
+    }
+  } catch (_) {}
+}
+
+// ══════════════════════════════════════════════════════════════════
 // VAULT CHAT
 // ══════════════════════════════════════════════════════════════════
 async function sendChat() {
@@ -978,6 +1192,7 @@ function showTab(name) {
   document.getElementById('tab-' + name).classList.add('active');
   event.currentTarget.classList.add('active');
   if (name === 'students') renderStudentTable(allStudents);
+  if (name === 'content')  loadContentLabData();
 }
 
 // ══════════════════════════════════════════════════════════════════

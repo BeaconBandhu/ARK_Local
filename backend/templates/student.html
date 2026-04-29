@@ -87,13 +87,13 @@
     }
     .nav-btn {
       flex: 1; background: none; border: none; color: var(--muted);
-      padding: 10px 4px 8px; cursor: pointer; font-size: 0.7rem;
-      display: flex; flex-direction: column; align-items: center; gap: 3px;
+      padding: 8px 2px 6px; cursor: pointer; font-size: 0.6rem;
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
       transition: color .2s;
     }
-    .nav-btn .icon { font-size: 1.3rem; }
+    .nav-btn .icon { font-size: 1.15rem; }
     .nav-btn.active { color: var(--primary); }
-    .nav-btn.active .icon { transform: scale(1.15); }
+    .nav-btn.active .icon { transform: scale(1.1); }
 
     /* ── TAB PANEL ── */
     .tab-panel { padding: 16px; animation: fadeIn .2s ease; }
@@ -220,6 +220,55 @@
       border-radius: 10px; color: #fff; font-size: 1.1rem; cursor: pointer; flex-shrink: 0;
     }
 
+    /* ── NOTES TAB ── */
+    .notes-text { font-size: .9rem; line-height: 1.95; white-space: pre-wrap; color: var(--text); }
+
+    /* ── QUIZ TAB ── */
+    .quiz-q-wrap  { margin-bottom: 14px; }
+    .quiz-q-label { font-weight: 700; font-size: .9rem; line-height: 1.5; margin-bottom: 10px; }
+    .quiz-opts    { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .quiz-opt-btn {
+      background: var(--accent); border: 1px solid var(--border);
+      border-radius: 10px; padding: 10px 12px; color: var(--text);
+      font-size: .82rem; cursor: pointer; text-align: left;
+      transition: all .15s; line-height: 1.4;
+    }
+    .quiz-opt-btn:hover        { border-color: var(--primary); }
+    .quiz-opt-btn.sel          { border-color: var(--primary);   background: rgba(233,69,96,.15);  color: var(--primary);  }
+    .quiz-opt-btn.correct-ans  { border-color: var(--fragment);  background: rgba(16,185,129,.15); color: var(--fragment); pointer-events:none; }
+    .quiz-opt-btn.wrong-ans    { border-color: var(--invert);    background: rgba(239,68,68,.15);  color: var(--invert);   pointer-events:none; }
+    .quiz-expl { font-size: .78rem; color: var(--muted); margin-top: 8px; line-height: 1.5; font-style: italic; }
+    .score-banner { text-align: center; padding: 20px; }
+    .score-big    { font-size: 3rem; font-weight: 900; }
+    .score-lbl    { font-size: .85rem; color: var(--muted); margin-top: 4px; }
+    .pts-earned   { font-size: 1rem; color: #10b981; font-weight: 700; margin-top: 8px; }
+
+    /* ── LEADERBOARD ── */
+    .lb-row  { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid rgba(34,34,51,.6); }
+    .lb-row:last-child { border-bottom: none; }
+    .lb-rank { font-size: .85rem; font-weight: 800; min-width: 28px; }
+    .lb-name { flex: 1; font-size: .88rem; }
+    .lb-pts  { font-size: .82rem; color: var(--muted); }
+    .lb-you  { color: var(--primary); }
+
+    /* ── REWARDS ── */
+    .pts-hero  { text-align: center; padding: 16px 0 10px; }
+    .pts-big   { font-size: 2.8rem; font-weight: 900; color: var(--primary); }
+    .pts-unit  { font-size: .8rem; color: var(--muted); }
+    .reward-track { position: relative; height: 8px; background: var(--accent); border-radius: 4px; margin: 16px 0 24px; }
+    .reward-fill  { position: absolute; left: 0; top: 0; height: 100%; border-radius: 4px; background: linear-gradient(90deg,#10b981,#e94560); transition: width .8s ease; }
+    .reward-milestones { display: flex; flex-direction: column; gap: 8px; }
+    .reward-row {
+      display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+      border-radius: 10px; border: 1px solid var(--border); background: var(--accent);
+    }
+    .reward-row.unlocked { border-color: currentColor; }
+    .reward-pts  { font-size: .72rem; font-weight: 800; min-width: 44px; }
+    .reward-info { flex: 1; }
+    .reward-name { font-size: .82rem; font-weight: 700; }
+    .reward-val  { font-size: .75rem; color: var(--muted); }
+    .reward-tick { font-size: 1rem; }
+
     /* ── CLASSMATE CARDS ── */
     .classmate-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .classmate-card {
@@ -312,6 +361,65 @@
       </div>
     </section>
 
+    <!-- ── NOTES TAB ── -->
+    <section id="tab-notes" class="tab-panel" hidden>
+      <div class="form-row" style="margin-bottom:14px">
+        <label>TOPIC</label>
+        <select id="notes-topic-sel" onchange="loadNotes(this.value)">
+          <option value="photosynthesis">Photosynthesis</option>
+          <option value="water_cycle">Water Cycle</option>
+          <option value="food_chain">Food Chain</option>
+        </select>
+      </div>
+
+      <div id="notes-empty" class="empty-state" hidden>
+        <span class="empty-icon">📖</span>
+        No notes for this topic yet.<br>Ask your teacher to generate notes from the Content Lab.
+      </div>
+      <div id="notes-loading" class="empty-state" hidden>Loading notes...</div>
+
+      <div id="notes-box" class="s-card" hidden>
+        <h4>Class Notes — <span id="notes-topic-disp"></span></h4>
+        <div class="notes-text" id="notes-body"></div>
+        <div id="notes-date" style="font-size:.7rem;color:var(--muted);margin-top:12px"></div>
+      </div>
+    </section>
+
+    <!-- ── QUIZ TAB ── -->
+    <section id="tab-quiz" class="tab-panel" hidden>
+      <div class="form-row" style="margin-bottom:14px">
+        <label>TOPIC</label>
+        <select id="quiz-topic-sel" onchange="loadQuiz(this.value)">
+          <option value="photosynthesis">Photosynthesis</option>
+          <option value="water_cycle">Water Cycle</option>
+          <option value="food_chain">Food Chain</option>
+        </select>
+      </div>
+
+      <div id="quiz-empty" class="empty-state" hidden>
+        <span class="empty-icon">❓</span>
+        No quiz for this topic yet.<br>Ask your teacher to generate one.
+      </div>
+      <div id="quiz-loading" class="empty-state" hidden>Loading quiz...</div>
+
+      <div id="quiz-active" hidden>
+        <div id="quiz-questions-wrap"></div>
+        <div style="padding:0 0 16px">
+          <button class="submit-btn" id="quiz-submit-btn" onclick="submitQuiz()">Submit Quiz →</button>
+        </div>
+      </div>
+
+      <div id="quiz-done" class="s-card" hidden>
+        <div class="score-banner">
+          <div class="score-big" id="score-fraction"></div>
+          <div class="score-lbl">questions correct</div>
+          <div class="pts-earned" id="score-pts"></div>
+        </div>
+        <div id="quiz-review"></div>
+        <button class="submit-btn" onclick="resetQuiz()" style="margin-top:12px">Try Again →</button>
+      </div>
+    </section>
+
     <!-- ── RESULT TAB ── -->
     <section id="tab-result" class="tab-panel" hidden>
       <div id="result-empty" class="empty-state">
@@ -394,6 +502,27 @@
           <div id="gap-nodes"></div>
         </div>
 
+        <!-- Rewards / Points -->
+        <div class="s-card">
+          <h4>Your Points &amp; Rewards</h4>
+          <div class="pts-hero">
+            <div class="pts-big" id="pts-big">0</div>
+            <div class="pts-unit">points earned</div>
+          </div>
+          <div class="reward-track">
+            <div class="reward-fill" id="reward-fill" style="width:0%"></div>
+          </div>
+          <div class="reward-milestones" id="reward-milestones"></div>
+        </div>
+
+        <!-- Class Leaderboard -->
+        <div class="s-card">
+          <h4>Class Leaderboard</h4>
+          <div id="leaderboard-list">
+            <p style="color:var(--muted);font-size:.85rem">Loading...</p>
+          </div>
+        </div>
+
         <div class="s-card">
           <h4>Submission History</h4>
           <div id="hist-table-wrap"></div>
@@ -432,16 +561,22 @@
 
   <nav class="bottom-nav">
     <button class="nav-btn active" onclick="switchTab('submit', this)">
-      <span class="icon">📝</span><span>Submit</span>
+      <span class="icon">✏️</span><span>Submit</span>
+    </button>
+    <button class="nav-btn" onclick="switchTab('notes', this)">
+      <span class="icon">📖</span><span>Notes</span>
+    </button>
+    <button class="nav-btn" onclick="switchTab('quiz', this)">
+      <span class="icon">❓</span><span>Quiz</span>
     </button>
     <button class="nav-btn" onclick="switchTab('result', this)">
-      <span class="icon">🎯</span><span>My Result</span>
+      <span class="icon">🎯</span><span>Analysis</span>
     </button>
     <button class="nav-btn" onclick="switchTab('progress', this)">
       <span class="icon">📈</span><span>Progress</span>
     </button>
     <button class="nav-btn" onclick="switchTab('chat', this)">
-      <span class="icon">💬</span><span>Image Chat</span>
+      <span class="icon">💬</span><span>Chat</span>
     </button>
   </nav>
 
@@ -518,10 +653,10 @@ function showApp() {
   if (lastResult) {
     renderResult(lastResult);
   } else {
-    // Fetch latest result from server (for seeded/returning students)
     fetchServerResult();
   }
   loadHistory();
+  loadPoints();
 }
 
 async function fetchServerResult() {
@@ -548,7 +683,9 @@ function switchTab(name, btn) {
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + name).hidden = false;
   btn.classList.add('active');
-  if (name === 'progress') loadHistory();
+  if (name === 'progress') { loadHistory(); loadPoints(); }
+  if (name === 'notes')    loadNotes();
+  if (name === 'quiz')     loadQuiz();
 }
 
 // ══════════════════════════════════════════════
@@ -770,6 +907,196 @@ function renderProgress(history) {
       <tbody>${rows}</tbody>
     </table>
   `;
+}
+
+// ══════════════════════════════════════════════
+// NOTES
+// ══════════════════════════════════════════════
+async function loadNotes(topic) {
+  topic = topic || document.getElementById('notes-topic-sel').value;
+  const empty   = document.getElementById('notes-empty');
+  const loading = document.getElementById('notes-loading');
+  const box     = document.getElementById('notes-box');
+  empty.hidden = box.hidden = true; loading.hidden = false;
+  try {
+    const res = await fetch(`${SERVER}/api/content/notes/${topic}`);
+    const d   = await res.json();
+    loading.hidden = true;
+    if (d.notes) {
+      box.hidden = false;
+      document.getElementById('notes-topic-disp').textContent = topic.replace(/_/g,' ');
+      document.getElementById('notes-body').textContent       = d.notes;
+      document.getElementById('notes-date').textContent       = 'Generated: ' + new Date(d.generated_at).toLocaleString();
+    } else {
+      empty.hidden = false;
+    }
+  } catch (_) { loading.hidden = true; empty.hidden = false; }
+}
+
+// ══════════════════════════════════════════════
+// QUIZ
+// ══════════════════════════════════════════════
+let quizData    = null;  // loaded questions
+let quizAnswers = {};    // {qi: chosen_option_index}
+
+async function loadQuiz(topic) {
+  topic = topic || document.getElementById('quiz-topic-sel').value;
+  const empty   = document.getElementById('quiz-empty');
+  const loading = document.getElementById('quiz-loading');
+  const active  = document.getElementById('quiz-active');
+  const done    = document.getElementById('quiz-done');
+  empty.hidden = active.hidden = done.hidden = true; loading.hidden = false;
+  quizData = null; quizAnswers = {};
+  try {
+    const res = await fetch(`${SERVER}/api/content/quiz/${topic}`);
+    const d   = await res.json();
+    loading.hidden = true;
+    const qs = d.questions || [];
+    if (!qs.length) { empty.hidden = false; return; }
+    quizData = d;
+    active.hidden = false;
+    renderQuizQuestions(qs);
+  } catch (_) { loading.hidden = true; empty.hidden = false; }
+}
+
+function renderQuizQuestions(qs) {
+  document.getElementById('quiz-questions-wrap').innerHTML = qs.map((q, i) => `
+    <div class="quiz-q-wrap s-card" id="qq-${i}">
+      <div class="quiz-q-label">Q${i+1}. ${q.question}</div>
+      <div class="quiz-opts">
+        ${q.options.map((opt, j) => `
+          <button class="quiz-opt-btn" id="qo-${i}-${j}"
+            onclick="selectQuizOpt(${i}, ${j})">
+            ${'ABCD'[j]}. ${opt}
+          </button>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function selectQuizOpt(qi, oi) {
+  // Deselect previous
+  for (let j = 0; j < 4; j++) {
+    const b = document.getElementById(`qo-${qi}-${j}`);
+    if (b) b.classList.remove('sel');
+  }
+  const chosen = document.getElementById(`qo-${qi}-${oi}`);
+  if (chosen) chosen.classList.add('sel');
+  quizAnswers[qi] = oi;
+}
+
+async function submitQuiz() {
+  if (!quizData) return;
+  const qs   = quizData.questions || [];
+  const ans  = qs.map((_, i) => quizAnswers[i] ?? -1);
+  const unanswered = ans.filter(a => a === -1).length;
+  if (unanswered > 0 && !confirm(`You have ${unanswered} unanswered question(s). Submit anyway?`)) return;
+
+  const topic = document.getElementById('quiz-topic-sel').value;
+  document.getElementById('quiz-submit-btn').textContent = 'Submitting...';
+  document.getElementById('quiz-submit-btn').disabled    = true;
+  try {
+    const res = await fetch(`${SERVER}/api/quiz/submit`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        student_id:   student.id,
+        student_name: student.name,
+        topic,
+        answers: ans,
+      })
+    });
+    const result = await res.json();
+    if (result.error) throw new Error(result.error);
+    showQuizResult(result);
+    // Refresh points
+    loadPoints();
+  } catch (e) {
+    alert('Submit failed: ' + e.message);
+  } finally {
+    document.getElementById('quiz-submit-btn').textContent = 'Submit Quiz →';
+    document.getElementById('quiz-submit-btn').disabled    = false;
+  }
+}
+
+function showQuizResult(result) {
+  document.getElementById('quiz-active').hidden = true;
+  document.getElementById('quiz-done').hidden   = false;
+  document.getElementById('score-fraction').textContent = `${result.num_correct}/${result.total}`;
+  document.getElementById('score-pts').textContent      = `+${result.points_earned} points earned!`;
+
+  const qs = result.questions || [];
+  document.getElementById('quiz-review').innerHTML = qs.map((q, i) => {
+    const chosen  = result.answers[i];
+    const correct = result.correct_answers[i];
+    return `<div class="quiz-q-wrap s-card">
+      <div class="quiz-q-label">Q${i+1}. ${q.question}</div>
+      <div class="quiz-opts">
+        ${q.options.map((opt, j) => `
+          <button class="quiz-opt-btn ${j === correct ? 'correct-ans' : (j === chosen && j !== correct ? 'wrong-ans' : '')}" disabled>
+            ${'ABCD'[j]}. ${opt}
+          </button>`).join('')}
+      </div>
+      ${q.explanation ? `<div class="quiz-expl">Explanation: ${q.explanation}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function resetQuiz() {
+  quizAnswers = {};
+  document.getElementById('quiz-done').hidden   = true;
+  document.getElementById('quiz-active').hidden = false;
+  renderQuizQuestions(quizData.questions);
+}
+
+// ══════════════════════════════════════════════
+// LEADERBOARD & REWARDS
+// ══════════════════════════════════════════════
+async function loadPoints() {
+  if (!student) return;
+  try {
+    const [pr, rr, lr] = await Promise.all([
+      fetch(`${SERVER}/api/student/${student.id}/points`),
+      fetch(`${SERVER}/api/rewards`),
+      fetch(`${SERVER}/api/leaderboard`),
+    ]);
+    const pd = await pr.json();
+    const rd = await rr.json();
+    const ld = await lr.json();
+    renderPoints(pd.points || 0, rd.rewards || [], ld.leaderboard || []);
+  } catch (_) {}
+}
+
+function renderPoints(pts, rewards, lb) {
+  document.getElementById('pts-big').textContent = pts;
+
+  // Reward track progress bar (0-100% up to the next milestone)
+  const maxPts  = rewards.length ? rewards[rewards.length - 1].points : 1000;
+  const fillPct = Math.min(100, Math.round(pts / maxPts * 100));
+  document.getElementById('reward-fill').style.width = fillPct + '%';
+
+  // Reward milestones
+  document.getElementById('reward-milestones').innerHTML = rewards.map(r => {
+    const unlocked = pts >= r.points;
+    return `<div class="reward-row ${unlocked ? 'unlocked' : ''}" style="${unlocked ? `color:${r.color}` : ''}">
+      <span class="reward-pts" style="color:${r.color}">${r.points} pts</span>
+      <div class="reward-info">
+        <div class="reward-name">${r.label}</div>
+        <div class="reward-val">${r.reward}</div>
+      </div>
+      <span class="reward-tick">${unlocked ? '✓' : '○'}</span>
+    </div>`;
+  }).join('');
+
+  // Leaderboard
+  const myRank = lb.findIndex(r => r.student_id === student.id);
+  document.getElementById('leaderboard-list').innerHTML = lb.length ? lb.map((r, i) => {
+    const isMe = r.student_id === student.id;
+    const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i+1}.`;
+    return `<div class="lb-row ${isMe ? 'lb-you' : ''}">
+      <span class="lb-rank">${medal}</span>
+      <span class="lb-name">${r.student_name}${isMe ? ' (You)' : ''}</span>
+      <span class="lb-pts">${r.points || 0} pts</span>
+    </div>`;
+  }).join('') : '<p style="color:var(--muted);font-size:.85rem">No leaderboard data yet.</p>';
 }
 
 // ══════════════════════════════════════════════

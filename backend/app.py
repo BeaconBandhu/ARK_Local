@@ -64,7 +64,9 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="ECHO ARK", version="1.0.0", lifespan=lifespan)
 
 from dashboard_routes import router as dashboard_router
+from content_routes import router as content_router
 app.include_router(dashboard_router)
+app.include_router(content_router)
 
 CORS_ORIGINS = os.getenv("CORS_ORIGINS", "*").split(",")
 app.add_middleware(
@@ -165,6 +167,10 @@ async def analyse(req: AnalyseRequest):
     await redis_svc.save_student_result(result)
     await redis_svc.enqueue_for_sync(result)
     await _broadcast(result)
+
+    # Award 5 points for submitting an answer
+    from content_routes import award_submission_points
+    asyncio.create_task(award_submission_points(req.student_id, req.student_name))
 
     # Immediately persist to MongoDB (don't wait for the slow sync loop)
     try:
