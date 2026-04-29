@@ -11,7 +11,8 @@ from pydantic import BaseModel
 
 router = APIRouter()
 
-TEMPLATE_PATH = Path(__file__).parent / "templates" / "dashboard.html"
+TEMPLATE_PATH  = Path(__file__).parent / "templates" / "dashboard.html"
+STUDENT_PATH   = Path(__file__).parent / "templates" / "student.html"
 
 # ── Serve the dashboard HTML ─────────────────────────────────────────────────
 
@@ -20,6 +21,13 @@ async def dashboard():
     if not TEMPLATE_PATH.exists():
         raise HTTPException(404, "dashboard.html not found")
     return FileResponse(str(TEMPLATE_PATH), media_type="text/html")
+
+
+@router.get("/student", include_in_schema=False)
+async def student_portal():
+    if not STUDENT_PATH.exists():
+        raise HTTPException(404, "student.html not found")
+    return FileResponse(str(STUDENT_PATH), media_type="text/html")
 
 
 # ── Student detail from MongoDB (with Redis fallback) ────────────────────────

@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ARK — Student Portal</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #1a1a2e;
+      --card:     #16213e;
+      --accent:   #0f3460;
+      --primary:  #e94560;
+      --text:     #e0e0e0;
+      --muted:    #8892a4;
+      --border:   #223;
+      --ghost:    #f59e0b;
+      --invert:   #ef4444;
+      --hollow:   #3b82f6;
+      --fragment: #10b981;
+      --orphan:   #8b5cf6;
+    }
+
+    html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); }
+
+    /* ── SCREENS ── */
+    .screen { min-height: 100vh; }
+
+    /* ── LOGIN ── */
+    #screen-login {
+      display: flex; align-items: center; justify-content: center;
+      background: radial-gradient(ellipse at 50% 30%, #0f3460 0%, #1a1a2e 70%);
+    }
+    .login-box {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 20px; padding: 40px 32px; width: 340px;
+      display: flex; flex-direction: column; gap: 16px; text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    .login-logo { font-size: 2.5rem; font-weight: 900; letter-spacing: 4px; color: var(--primary); }
+    .login-subtitle { color: var(--muted); font-size: 0.85rem; margin-top: -8px; }
+    .login-box input {
+      background: var(--accent); border: 1px solid var(--border); border-radius: 10px;
+      padding: 12px 16px; color: var(--text); font-size: 1rem; outline: none; width: 100%;
+    }
+    .login-box input:focus { border-color: var(--primary); }
+    .login-box input::placeholder { color: var(--muted); }
+    .login-btn {
+      background: var(--primary); color: #fff; border: none; border-radius: 10px;
+      padding: 14px; font-size: 1rem; font-weight: 700; cursor: pointer;
+      transition: opacity .2s;
+    }
+    .login-btn:hover { opacity: 0.85; }
+    .login-server { font-size: 0.75rem; color: var(--muted); }
+
+    /* ── APP LAYOUT ── */
+    #screen-app {
+      display: flex; flex-direction: column; height: 100vh; overflow: hidden;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--card); border-bottom: 1px solid var(--border);
+      padding: 12px 16px; display: flex; align-items: center; gap: 12px;
+      flex-shrink: 0;
+    }
+    .hdr-logo { font-weight: 900; font-size: 1.2rem; color: var(--primary); letter-spacing: 2px; }
+    .hdr-info { flex: 1; }
+    .hdr-name { font-weight: 600; font-size: 0.95rem; }
+    .hdr-id { font-size: 0.75rem; color: var(--muted); }
+    .logout-btn {
+      background: none; border: 1px solid var(--border); color: var(--muted);
+      border-radius: 8px; padding: 6px 10px; cursor: pointer; font-size: 0.8rem;
+    }
+    .logout-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+    /* ── MAIN CONTENT ── */
+    main { flex: 1; overflow-y: auto; padding: 0 0 80px 0; }
+
+    /* ── BOTTOM NAV ── */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: var(--card); border-top: 1px solid var(--border);
+      display: flex; z-index: 100;
+    }
+    .nav-btn {
+      flex: 1; background: none; border: none; color: var(--muted);
+      padding: 10px 4px 8px; cursor: pointer; font-size: 0.7rem;
+      display: flex; flex-direction: column; align-items: center; gap: 3px;
+      transition: color .2s;
+    }
+    .nav-btn .icon { font-size: 1.3rem; }
+    .nav-btn.active { color: var(--primary); }
+    .nav-btn.active .icon { transform: scale(1.15); }
+
+    /* ── TAB PANEL ── */
+    .tab-panel { padding: 16px; animation: fadeIn .2s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+    /* ── SECTION CARDS ── */
+    .s-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 14px; padding: 16px; margin-bottom: 14px;
+    }
+    .s-card h4 { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+
+    /* ── SUBMIT TAB ── */
+    .form-row { margin-bottom: 14px; }
+    .form-row label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 6px; letter-spacing: 0.5px; }
+    .form-row select, .form-row textarea {
+      width: 100%; background: var(--accent); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 14px; color: var(--text);
+      font-size: 0.95rem; outline: none; font-family: inherit;
+    }
+    .form-row select:focus, .form-row textarea:focus { border-color: var(--primary); }
+    .form-row textarea { resize: vertical; min-height: 130px; }
+    .submit-btn {
+      width: 100%; background: var(--primary); color: #fff; border: none;
+      border-radius: 12px; padding: 15px; font-size: 1rem; font-weight: 700;
+      cursor: pointer; transition: opacity .2s; margin-top: 4px;
+    }
+    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .submit-btn:not(:disabled):hover { opacity: 0.85; }
+
+    /* ── FINGERPRINT BADGE ── */
+    .fp-banner {
+      border-radius: 14px; border: 2px solid; padding: 18px 16px;
+      margin-bottom: 14px; text-align: center;
+    }
+    .fp-type { font-size: 1.6rem; font-weight: 900; letter-spacing: 3px; }
+    .fp-label { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
+    .fp-desc { font-size: 0.85rem; margin-top: 8px; line-height: 1.5; }
+
+    /* ── DRIFT BAR ── */
+    .drift-wrap { display: flex; align-items: center; gap: 12px; }
+    .drift-track {
+      flex: 1; height: 14px; background: var(--accent);
+      border-radius: 7px; overflow: hidden;
+    }
+    .drift-fill {
+      height: 100%; border-radius: 7px;
+      background: linear-gradient(90deg, #10b981, #f59e0b, #ef4444);
+      transition: width .8s ease;
+    }
+    .drift-pct { font-size: 1.1rem; font-weight: 700; min-width: 45px; text-align: right; }
+
+    /* ── NODE CHIPS ── */
+    .node-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+    .node-chip {
+      border-radius: 20px; padding: 5px 12px; font-size: 0.78rem;
+      font-weight: 600; border: 1px solid; text-transform: capitalize;
+    }
+    .node-chip.activated { background: rgba(16,185,129,.15); border-color: var(--fragment); color: var(--fragment); }
+    .node-chip.skipped   { background: rgba(239,68,68,.15);  border-color: var(--invert);  color: var(--invert);  }
+    .node-chip.wrong     { background: rgba(245,158,11,.15); border-color: var(--ghost);   color: var(--ghost);   }
+
+    /* ── RESULT TEXT ── */
+    .res-text { line-height: 1.7; font-size: 0.92rem; }
+    .followup-q {
+      background: rgba(233,69,96,.1); border-left: 3px solid var(--primary);
+      border-radius: 0 10px 10px 0; padding: 12px 16px;
+      font-style: italic; line-height: 1.7; font-size: 0.92rem;
+    }
+    .empty-state {
+      text-align: center; color: var(--muted); padding: 60px 20px;
+      font-size: 0.95rem; line-height: 1.8;
+    }
+    .empty-icon { font-size: 3rem; display: block; margin-bottom: 12px; }
+
+    /* ── PROGRESS TAB ── */
+    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+    .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 10px; text-align: center; }
+    .stat-val { font-size: 1.4rem; font-weight: 800; }
+    .stat-lbl { font-size: 0.7rem; color: var(--muted); margin-top: 3px; }
+
+    .hist-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .hist-table th { color: var(--muted); font-size: 0.72rem; text-transform: uppercase; padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: left; }
+    .hist-table td { padding: 10px; border-bottom: 1px solid rgba(34,34,51,.6); }
+    .hist-table tr:last-child td { border-bottom: none; }
+
+    /* ── CHAT TAB ── */
+    .chat-wrap { display: flex; flex-direction: column; height: calc(100vh - 180px); }
+    .chat-messages {
+      flex: 1; overflow-y: auto; padding: 16px; display: flex;
+      flex-direction: column; gap: 10px;
+    }
+    .chat-hint { color: var(--muted); text-align: center; font-size: 0.85rem; margin: auto; }
+    .chat-msg { max-width: 85%; padding: 10px 14px; border-radius: 14px; font-size: 0.9rem; line-height: 1.5; }
+    .chat-msg.user { align-self: flex-end; background: var(--primary); color: #fff; border-radius: 14px 14px 4px 14px; }
+    .chat-msg.assistant { align-self: flex-start; background: var(--card); border: 1px solid var(--border); border-radius: 14px 14px 14px 4px; }
+    .chat-msg.system { align-self: center; background: none; color: var(--muted); font-size: 0.8rem; }
+    .chat-msg.loading { opacity: 0.6; }
+
+    .img-preview-bar {
+      padding: 8px 16px; background: var(--accent); border-top: 1px solid var(--border);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .img-preview-bar img { height: 50px; border-radius: 6px; object-fit: cover; }
+    .img-clear { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1.2rem; }
+
+    .chat-bar {
+      padding: 10px 12px; background: var(--card); border-top: 1px solid var(--border);
+      display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+    }
+    .cam-label {
+      width: 40px; height: 40px; background: var(--accent); border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; cursor: pointer; flex-shrink: 0; border: 1px solid var(--border);
+    }
+    .cam-label:hover { border-color: var(--primary); }
+    .chat-bar input[type=text] {
+      flex: 1; background: var(--accent); border: 1px solid var(--border);
+      border-radius: 10px; padding: 10px 14px; color: var(--text); outline: none; font-size: 0.9rem;
+    }
+    .chat-bar input[type=text]:focus { border-color: var(--primary); }
+    .send-btn {
+      width: 40px; height: 40px; background: var(--primary); border: none;
+      border-radius: 10px; color: #fff; font-size: 1.1rem; cursor: pointer; flex-shrink: 0;
+    }
+
+    /* ── UTILS ── */
+    .pill { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+
+    /* ── RESPONSIVE ── */
+    @media (min-width: 600px) {
+      .login-box { width: 400px; }
+      #screen-app { max-width: 600px; margin: 0 auto; }
+      .bottom-nav { max-width: 600px; left: 50%; transform: translateX(-50%); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════ LOGIN SCREEN ══════════════ -->
+<div id="screen-login" class="screen">
+  <div class="login-box">
+    <div class="login-logo">ARK</div>
+    <p class="login-subtitle">Classroom Comprehension System</p>
+
+    <input id="inp-id"   type="text" placeholder="Student ID  (e.g. S01)" autocomplete="off" />
+    <input id="inp-name" type="text" placeholder="Your Name" autocomplete="name" />
+
+    <button class="login-btn" onclick="doLogin()">Enter Class →</button>
+    <p class="login-server">Connected to: <span id="srv-label"></span></p>
+  </div>
+</div>
+
+<!-- ══════════════ MAIN APP ══════════════ -->
+<div id="screen-app" class="screen" hidden>
+
+  <header>
+    <div class="hdr-logo">ARK</div>
+    <div class="hdr-info">
+      <div class="hdr-name" id="hdr-name"></div>
+      <div class="hdr-id" id="hdr-id"></div>
+    </div>
+    <button class="logout-btn" onclick="doLogout()">Sign out</button>
+  </header>
+
+  <main>
+
+    <!-- ── SUBMIT TAB ── -->
+    <section id="tab-submit" class="tab-panel">
+      <div class="s-card" style="margin-bottom:14px">
+        <h4>Submit Your Answer</h4>
+        <div class="form-row">
+          <label>TOPIC</label>
+          <select id="sel-topic">
+            <option value="photosynthesis">Photosynthesis</option>
+            <option value="water_cycle">Water Cycle</option>
+            <option value="food_chain">Food Chain</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>LANGUAGE</label>
+          <select id="sel-lang">
+            <option value="english">English</option>
+            <option value="hindi">Hindi</option>
+            <option value="kannada">Kannada</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>YOUR EXPLANATION</label>
+          <textarea id="inp-answer" placeholder="Explain the topic in your own words. Be as detailed as you can — there are no wrong attempts, only gaps we can fix."></textarea>
+        </div>
+        <button class="submit-btn" id="btn-submit" onclick="submitAnswer()">
+          Analyse My Answer →
+        </button>
+      </div>
+
+      <div class="s-card">
+        <h4>How It Works</h4>
+        <p style="font-size:.85rem;color:var(--muted);line-height:1.8">
+          ARK maps your answer against a concept graph and identifies exactly which piece of understanding is missing.
+          Lower drift = better understanding. Your teacher sees your result live on their dashboard.
+        </p>
+      </div>
+    </section>
+
+    <!-- ── RESULT TAB ── -->
+    <section id="tab-result" class="tab-panel" hidden>
+      <div id="result-empty" class="empty-state">
+        <span class="empty-icon">🎯</span>
+        Submit an answer on the <strong>Submit</strong> tab<br>to see your gap analysis here.
+      </div>
+
+      <div id="result-content" hidden>
+
+        <!-- Fingerprint banner -->
+        <div class="fp-banner" id="fp-banner">
+          <div class="fp-type" id="fp-type"></div>
+          <div class="fp-label">COMPREHENSION FINGERPRINT</div>
+          <div class="fp-desc" id="fp-desc"></div>
+        </div>
+
+        <!-- Concept map -->
+        <div class="s-card">
+          <h4>Concept Map — What You Covered</h4>
+          <div class="node-grid" id="node-grid"></div>
+        </div>
+
+        <!-- Drift score -->
+        <div class="s-card">
+          <h4>Drift Score (lower is better)</h4>
+          <div class="drift-wrap">
+            <div class="drift-track"><div class="drift-fill" id="drift-fill" style="width:0%"></div></div>
+            <div class="drift-pct" id="drift-pct">0%</div>
+          </div>
+        </div>
+
+        <!-- What's wrong -->
+        <div class="s-card">
+          <h4>Your Specific Gap</h4>
+          <p class="res-text" id="res-wrong"></p>
+        </div>
+
+        <!-- Story fix -->
+        <div class="s-card">
+          <h4>Think of It This Way</h4>
+          <p class="res-text" id="res-story"></p>
+        </div>
+
+        <!-- Follow-up -->
+        <div class="s-card">
+          <h4>Follow-Up Question For You</h4>
+          <div class="followup-q" id="res-followup"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── PROGRESS TAB ── -->
+    <section id="tab-progress" class="tab-panel" hidden>
+
+      <div id="prog-empty" class="empty-state" hidden>
+        <span class="empty-icon">📈</span>
+        No submission history yet.<br>Submit answers to track your progress.
+      </div>
+
+      <div id="prog-content">
+        <div class="stats-row" id="stats-row"></div>
+
+        <div class="s-card">
+          <h4>Drift Over Time (lower = better)</h4>
+          <canvas id="progress-chart" height="180"></canvas>
+        </div>
+
+        <div class="s-card" id="gap-analysis-card" hidden>
+          <h4>Your Knowledge Gaps</h4>
+          <div id="gap-nodes"></div>
+        </div>
+
+        <div class="s-card">
+          <h4>Submission History</h4>
+          <div id="hist-table-wrap"></div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ── CHAT TAB ── -->
+    <section id="tab-chat" class="tab-panel" style="padding:0" hidden>
+      <div class="chat-wrap">
+        <div class="chat-messages" id="chat-messages">
+          <div class="chat-hint">
+            📷 Upload a diagram or image from your textbook<br>then ask a question about it.
+          </div>
+        </div>
+
+        <div class="img-preview-bar" id="img-bar" hidden>
+          <img id="img-preview" alt="selected" />
+          <span style="flex:1;font-size:.8rem;color:var(--muted)">Image selected</span>
+          <button class="img-clear" onclick="clearImage()">✕</button>
+        </div>
+
+        <div class="chat-bar">
+          <label class="cam-label" title="Pick image">
+            📷
+            <input type="file" id="img-pick" accept="image/*" capture="environment" hidden onchange="handleImage(event)" />
+          </label>
+          <input type="text" id="chat-inp" placeholder="Ask about the image…" />
+          <button class="send-btn" onclick="sendChat()">➤</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <nav class="bottom-nav">
+    <button class="nav-btn active" onclick="switchTab('submit', this)">
+      <span class="icon">📝</span><span>Submit</span>
+    </button>
+    <button class="nav-btn" onclick="switchTab('result', this)">
+      <span class="icon">🎯</span><span>My Result</span>
+    </button>
+    <button class="nav-btn" onclick="switchTab('progress', this)">
+      <span class="icon">📈</span><span>Progress</span>
+    </button>
+    <button class="nav-btn" onclick="switchTab('chat', this)">
+      <span class="icon">💬</span><span>Image Chat</span>
+    </button>
+  </nav>
+
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════
+const SERVER   = window.location.origin;
+let student    = null;   // {id, name}
+let lastResult = null;   // last /analyse response
+let progChart  = null;   // Chart.js instance
+let selImage   = null;   // selected File for image chat
+
+const FP_COLOR = {
+  GHOST:    '#f59e0b',
+  INVERT:   '#ef4444',
+  HOLLOW:   '#3b82f6',
+  FRAGMENT: '#10b981',
+  ORPHAN:   '#8b5cf6',
+};
+const FP_DESC = {
+  GHOST:    'You hold a strong but completely wrong belief — you are confident but the core idea is incorrect.',
+  INVERT:   'You have cause and effect reversed — the parts are right but the direction is wrong.',
+  HOLLOW:   'You use the right keywords but cannot explain the mechanism — it sounds right but means nothing.',
+  FRAGMENT: 'You understand part of the chain correctly but one key link is missing.',
+  ORPHAN:   'A prerequisite concept is missing, which causes confusion about everything that follows.',
+};
+
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+document.getElementById('srv-label').textContent = SERVER;
+
+const savedStudent = localStorage.getItem('ark_student');
+if (savedStudent) {
+  student = JSON.parse(savedStudent);
+  showApp();
+}
+
+const savedResult = localStorage.getItem('ark_last_result');
+if (savedResult) {
+  lastResult = JSON.parse(savedResult);
+}
+
+// ══════════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════════
+function doLogin() {
+  const id   = document.getElementById('inp-id').value.trim().toUpperCase();
+  const name = document.getElementById('inp-name').value.trim();
+  if (!id || !name) { alert('Please enter both your ID and name.'); return; }
+  student = { id, name };
+  localStorage.setItem('ark_student', JSON.stringify(student));
+  showApp();
+}
+
+function doLogout() {
+  if (!confirm('Sign out? Your progress is saved on the server.')) return;
+  localStorage.removeItem('ark_student');
+  localStorage.removeItem('ark_last_result');
+  student    = null;
+  lastResult = null;
+  document.getElementById('screen-login').hidden = false;
+  document.getElementById('screen-app').hidden   = true;
+}
+
+function showApp() {
+  document.getElementById('screen-login').hidden = true;
+  document.getElementById('screen-app').hidden   = false;
+  document.getElementById('hdr-name').textContent = student.name;
+  document.getElementById('hdr-id').textContent   = student.id;
+  if (lastResult) renderResult(lastResult);
+  loadHistory();
+}
+
+// Enter key on login inputs
+document.getElementById('inp-name').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+// ══════════════════════════════════════════════
+// TABS
+// ══════════════════════════════════════════════
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.hidden = true);
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).hidden = false;
+  btn.classList.add('active');
+  if (name === 'progress') loadHistory();
+}
+
+// ══════════════════════════════════════════════
+// SUBMIT ANSWER
+// ══════════════════════════════════════════════
+async function submitAnswer() {
+  const topic  = document.getElementById('sel-topic').value;
+  const lang   = document.getElementById('sel-lang').value;
+  const answer = document.getElementById('inp-answer').value.trim();
+
+  if (!answer) { alert('Please write your explanation before submitting.'); return; }
+
+  const btn = document.getElementById('btn-submit');
+  btn.textContent = 'Analysing… please wait';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch(SERVER + '/analyse', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        student_id:   student.id,
+        student_name: student.name,
+        topic,
+        answer_text:  answer,
+        language:     lang,
+      }),
+    });
+
+    if (!res.ok) throw new Error(`Server error ${res.status}`);
+    const data = await res.json();
+    lastResult = data;
+    localStorage.setItem('ark_last_result', JSON.stringify(data));
+    renderResult(data);
+
+    // Jump to result tab
+    document.querySelectorAll('.tab-panel').forEach(p => p.hidden = true);
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-result').hidden = false;
+    document.querySelectorAll('.nav-btn')[1].classList.add('active');
+
+  } catch (e) {
+    alert('Could not reach the backend.\n\nMake sure the server is running at:\n' + SERVER);
+  } finally {
+    btn.textContent = 'Analyse My Answer →';
+    btn.disabled = false;
+  }
+}
+
+// ══════════════════════════════════════════════
+// RENDER RESULT
+// ══════════════════════════════════════════════
+function renderResult(data) {
+  document.getElementById('result-empty').hidden    = true;
+  document.getElementById('result-content').hidden  = false;
+
+  const fp    = data.fingerprint || 'FRAGMENT';
+  const color = FP_COLOR[fp] || '#8892a4';
+
+  // Fingerprint banner
+  const banner = document.getElementById('fp-banner');
+  banner.style.borderColor = color;
+  banner.style.color       = color;
+  document.getElementById('fp-type').textContent = fp;
+  document.getElementById('fp-desc').textContent = FP_DESC[fp] || '';
+
+  // Drift
+  const drift = Math.round((data.drift_score || 0) * 100);
+  document.getElementById('drift-fill').style.width = drift + '%';
+  document.getElementById('drift-pct').textContent  = drift + '%';
+  document.getElementById('drift-pct').style.color  = drift > 70 ? '#ef4444' : drift > 45 ? '#f59e0b' : '#10b981';
+
+  // Nodes
+  const grid      = document.getElementById('node-grid');
+  grid.innerHTML  = '';
+  const activated = data.activated_nodes || [];
+  const skipped   = data.skipped_nodes   || [];
+  const wrong     = data.wrong_claims    || [];
+
+  activated.forEach(n => grid.appendChild(makeChip(n, 'activated', '✓')));
+  skipped.forEach(n   => grid.appendChild(makeChip(n, 'skipped',   '✗')));
+  wrong.forEach(n     => grid.appendChild(makeChip(n, 'wrong',     '⚠')));
+
+  // Text
+  const rem = data.remediation || {};
+  document.getElementById('res-wrong').textContent    = rem.what_is_wrong       || data.explanation || '—';
+  document.getElementById('res-story').textContent    = rem.story_fix            || '—';
+  document.getElementById('res-followup').textContent = rem.follow_up_question   || '—';
+}
+
+function makeChip(name, cls, icon) {
+  const d = document.createElement('div');
+  d.className   = 'node-chip ' + cls;
+  d.textContent = icon + ' ' + name.replace(/_/g, ' ');
+  return d;
+}
+
+// ══════════════════════════════════════════════
+// PROGRESS
+// ══════════════════════════════════════════════
+async function loadHistory() {
+  if (!student) return;
+  try {
+    const res  = await fetch(SERVER + '/api/student/' + student.id + '/history');
+    if (!res.ok) return;
+    const data = await res.json();
+    renderProgress(data.history || []);
+  } catch (_) { /* server offline */ }
+
+  // Also load skipped nodes from last result for gap analysis card
+  if (lastResult) {
+    const skipped = lastResult.skipped_nodes || [];
+    if (skipped.length) {
+      const card = document.getElementById('gap-analysis-card');
+      card.hidden = false;
+      const wrap  = document.getElementById('gap-nodes');
+      wrap.innerHTML = '';
+      skipped.forEach(n => wrap.appendChild(makeChip(n, 'skipped', '✗')));
+    }
+  }
+}
+
+function renderProgress(history) {
+  const content = document.getElementById('prog-content');
+  const empty   = document.getElementById('prog-empty');
+
+  if (!history.length) {
+    empty.hidden   = false;
+    content.hidden = true;
+    return;
+  }
+  empty.hidden   = true;
+  content.hidden = false;
+
+  // Stats row
+  const latest    = history[history.length - 1];
+  const fpCounts  = {};
+  history.forEach(h => { fpCounts[h.fingerprint] = (fpCounts[h.fingerprint] || 0) + 1; });
+  const dominant  = Object.entries(fpCounts).sort((a, b) => b[1] - a[1])[0][0];
+  const avgDrift  = (history.reduce((s, h) => s + h.drift_score, 0) / history.length * 100).toFixed(0);
+
+  document.getElementById('stats-row').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-val">${history.length}</div>
+      <div class="stat-lbl">Submissions</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" style="color:${FP_COLOR[latest.fingerprint]}">${latest.fingerprint}</div>
+      <div class="stat-lbl">Latest Type</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val">${avgDrift}%</div>
+      <div class="stat-lbl">Avg Drift</div>
+    </div>
+  `;
+
+  // Chart
+  const labels = history.map(h => {
+    const d = new Date(h.timestamp);
+    return (d.getMonth() + 1) + '/' + d.getDate();
+  });
+  const vals   = history.map(h => +(h.drift_score * 100).toFixed(1));
+  const ptClrs = history.map(h => FP_COLOR[h.fingerprint] || '#8892a4');
+
+  if (progChart) progChart.destroy();
+  progChart = new Chart(document.getElementById('progress-chart'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Drift %',
+        data:  vals,
+        borderColor: '#e94560',
+        backgroundColor: 'rgba(233,69,96,.12)',
+        pointBackgroundColor: ptClrs,
+        pointBorderColor: ptClrs,
+        pointRadius: 7,
+        pointHoverRadius: 9,
+        tension: 0.35,
+        fill: true,
+      }],
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: {
+          min: 0, max: 100,
+          ticks: { color: '#8892a4', callback: v => v + '%' },
+          grid:  { color: 'rgba(136,146,164,.15)' },
+        },
+        x: {
+          ticks: { color: '#8892a4' },
+          grid:  { color: 'rgba(136,146,164,.15)' },
+        },
+      },
+    },
+  });
+
+  // History table
+  const rows = history.slice().reverse().map(h => {
+    const d    = new Date(h.timestamp);
+    const date = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+    const col  = FP_COLOR[h.fingerprint] || '#8892a4';
+    return `<tr>
+      <td>${date}</td>
+      <td style="text-transform:capitalize">${h.topic.replace(/_/g,' ')}</td>
+      <td><span class="pill" style="color:${col};border:1px solid ${col};background:${col}22">${h.fingerprint}</span></td>
+      <td>${(h.drift_score*100).toFixed(0)}%</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('hist-table-wrap').innerHTML = `
+    <table class="hist-table">
+      <thead><tr><th>Date</th><th>Topic</th><th>Type</th><th>Drift</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
+
+// ══════════════════════════════════════════════
+// IMAGE CHAT
+// ══════════════════════════════════════════════
+function handleImage(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  selImage = file;
+  const url = URL.createObjectURL(file);
+  document.getElementById('img-preview').src = url;
+  document.getElementById('img-bar').hidden  = false;
+}
+
+function clearImage() {
+  selImage = null;
+  document.getElementById('img-bar').hidden = true;
+  document.getElementById('img-pick').value = '';
+}
+
+function addMsg(text, role) {
+  const box = document.getElementById('chat-messages');
+  // Remove hint on first real message
+  const hint = box.querySelector('.chat-hint');
+  if (hint) hint.remove();
+
+  const div = document.createElement('div');
+  div.className   = 'chat-msg ' + role;
+  div.textContent = text;
+  if (role === 'loading') div.id = 'loading-msg';
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+  return div;
+}
+
+async function sendChat() {
+  const q = document.getElementById('chat-inp').value.trim();
+  if (!q)        { addMsg('Type a question first.', 'system'); return; }
+  if (!selImage) { addMsg('Please pick an image first using the 📷 button.', 'system'); return; }
+
+  document.getElementById('chat-inp').value = '';
+  addMsg(q, 'user');
+  addMsg('Thinking…', 'assistant loading');
+
+  try {
+    const fd = new FormData();
+    fd.append('image',      selImage);
+    fd.append('question',   q);
+    fd.append('student_id', student.id);
+
+    const res  = await fetch(SERVER + '/api/image-chat', { method: 'POST', body: fd });
+    const data = await res.json();
+    document.getElementById('loading-msg')?.remove();
+    addMsg(data.answer || data.error || 'No response.', 'assistant');
+  } catch (_) {
+    document.getElementById('loading-msg')?.remove();
+    addMsg('Could not reach the server.', 'system');
+  }
+}
+
+document.getElementById('chat-inp').addEventListener('keydown', e => {
+  if (e.key === 'Enter') sendChat();
+});
+</script>
+</body>
+</html>
