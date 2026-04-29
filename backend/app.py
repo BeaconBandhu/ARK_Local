@@ -293,18 +293,35 @@ async def obsidian_index():
 
 @app.post("/api/image-chat")
 async def image_chat(
-    question: str = Form(...),
-    image: UploadFile | None = File(None),
+    question:   str              = Form(...),
+    image:      UploadFile | None = File(None),
+    student_id: str              = Form(""),
 ):
     if not await ollama.is_available():
-        raise HTTPException(503, "Ollama is not available")
+        return JSONResponse({"error": "Ollama is not running. Start it with: ollama serve"}, status_code=503)
 
     image_bytes = await image.read() if image else None
-    if image_bytes:
-        answer = await ollama.generate_with_image(question, image_bytes=image_bytes)
-    else:
-        answer = await ollama.generate(question)
-    return {"answer": answer}
+
+    # Try vision model first; fall back to text model if vision model not installed
+    try:
+        if image_bytes:
+            answer = await ollama.generate_with_image(question, image_bytes=image_bytes)
+        else:
+            answer = await ollama.generate(question)
+    except Exception as vision_err:
+        logger.warning("Vision model failed (%s) — falling back to text model", vision_err)
+        try:
+            fallback_prompt = (
+                f"A student is looking at an image and asked: {question}\n\n"
+                "The image analysis model is not installed, so answer based on the question text alone. "
+                "Give a clear educational answer for a Grade 6 student. "
+                "End with: (Note: Install a vision model with 'ollama pull moondream2' for full image analysis.)"
+            )
+            answer = await ollama.generate(fallback_prompt)
+        except Exception as text_err:
+            return JSONResponse({"error": f"Both vision and text models failed: {text_err}"}, status_code=500)
+
+    return JSONResponse({"answer": answer})
 
 
 @app.get("/api/status")

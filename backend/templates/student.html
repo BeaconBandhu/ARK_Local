@@ -1186,19 +1186,30 @@ async function sendChat() {
   addMsg(q, 'user');
   addMsg('Thinking…', 'assistant loading');
 
+  let res;
   try {
     const fd = new FormData();
-    fd.append('image',      selImage);
+    if (selImage) fd.append('image', selImage);
     fd.append('question',   q);
     fd.append('student_id', student.id);
 
-    const res  = await fetch(SERVER + '/api/image-chat', { method: 'POST', body: fd });
-    const data = await res.json();
+    res = await fetch(SERVER + '/api/image-chat', { method: 'POST', body: fd });
+  } catch (netErr) {
     document.getElementById('loading-msg')?.remove();
-    addMsg(data.answer || data.error || 'No response.', 'assistant');
-  } catch (_) {
-    document.getElementById('loading-msg')?.remove();
-    addMsg('Could not reach the server.', 'system');
+    addMsg('Network error — make sure the backend is running at ' + SERVER, 'system');
+    return;
+  }
+
+  document.getElementById('loading-msg')?.remove();
+
+  let data = {};
+  try { data = await res.json(); } catch (_) { data = {}; }
+
+  if (data.answer) {
+    addMsg(data.answer, 'assistant');
+  } else {
+    const errText = data.error || data.detail || `Server error ${res.status}`;
+    addMsg(errText, 'system');
   }
 }
 

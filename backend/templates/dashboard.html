@@ -1117,15 +1117,23 @@ async function sendChat() {
   input.value = '';
   appendBubble('user', q);
   document.getElementById('send-btn').disabled = true;
+  let r;
   try {
-    const r = await fetch('/api/obsidian/query', {
+    r = await fetch('/api/obsidian/query', {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({query: q})
     });
-    const data = await r.json();
-    appendBubble('ai', data.answer || 'No response.');
   } catch {
-    appendBubble('ai', 'Could not reach Ollama. Make sure it is running.');
+    appendBubble('ai', 'Network error — backend not reachable.');
+    document.getElementById('send-btn').disabled = false;
+    return;
+  }
+  let data = {};
+  try { data = await r.json(); } catch (_) {}
+  if (data.answer) {
+    appendBubble('ai', data.answer);
+  } else {
+    appendBubble('ai', data.detail || data.error || `Server error ${r.status} — check Ollama is running.`);
   }
   document.getElementById('send-btn').disabled = false;
 }
