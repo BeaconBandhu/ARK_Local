@@ -21,11 +21,13 @@ router = APIRouter()
 class GenerateNotesReq(BaseModel):
     topic: str
     context: str = ""
+    language: str = "english"
 
 class GenerateQuizReq(BaseModel):
     topic: str
     num_questions: int = 5
     context: str = ""
+    language: str = "english"
 
 class QuizSubmitReq(BaseModel):
     student_id: str
@@ -160,6 +162,7 @@ async def generate_notes(req: GenerateNotesReq):
 
     topic_plain = req.topic.replace("_", " ").title()
     ref_block   = f"Reference material:\n{context[:2000]}\n\n" if context else ""
+    lang_note   = f"\n\nIMPORTANT: Write the ENTIRE response in {req.language}. All section labels and content must be in {req.language}." if req.language != "english" else ""
 
     prompt = f"""{ref_block}You are a science teacher writing study notes for Grade 6 students (age 11-12) in India.
 
@@ -182,22 +185,25 @@ REAL WORLD EXAMPLE: (one example from everyday life a student in India would rec
 
 COMMON MISTAKE: (the one thing students most often get wrong and why it is wrong)
 
-Keep the total under 280 words. Write in plain English — no bullet symbols, no markdown."""
+Keep the total under 280 words. Write in plain text — no bullet symbols, no markdown.{lang_note}"""
 
     try:
         notes_text = await _ai_generate(prompt)
     except RuntimeError as e:
         raise HTTPException(503, str(e))
 
+    topic_key = f"{req.topic}__{req.language}" if req.language != "english" else req.topic
     doc = {
-        "topic":        req.topic,
+        "topic":        topic_key,
+        "topic_base":   req.topic,
+        "language":     req.language,
         "notes":        notes_text.strip(),
         "generated_at": datetime.utcnow().isoformat(),
         "has_context":  bool(context),
     }
     try:
         if await mongo_svc.is_available():
-            await mongo_svc.db.notes.replace_one({"topic": req.topic}, doc, upsert=True)
+            await mongo_svc.db.notes.replace_one({"topic": topic_key}, doc, upsert=True)
     except Exception:
         pass
 
@@ -228,6 +234,7 @@ async def generate_quiz(req: GenerateQuizReq):
 
     ref_block   = f"Reference:\n{context}\n\n" if context else ""
     topic_plain = req.topic.replace("_", " ")
+    lang_note   = f"\n\nIMPORTANT: Write ALL questions, options, and explanations in {req.language}." if req.language != "english" else ""
 
     prompt = f"""{ref_block}Create exactly {n} multiple-choice questions about "{topic_plain}" for Grade 6 students.
 
@@ -247,7 +254,7 @@ Rules:
 - All 4 options must be plausible, not obviously wrong
 - Test understanding, not just memory
 - Simple language suitable for 11-12 year olds
-- Generate exactly {n} items in the array"""
+- Generate exactly {n} items in the array{lang_note}"""
 
     try:
         raw = await _ai_generate(prompt)
@@ -259,7 +266,6 @@ Rules:
         logger.warning("Quiz JSON parse failed for topic %s, using fallback", req.topic)
         questions = _fallback_quiz(req.topic)[:n]
 
-    # Validate each question
     valid = []
     for q in questions:
         if isinstance(q, dict) and "question" in q and "options" in q and len(q.get("options", [])) == 4 and "correct" in q:
@@ -267,15 +273,18 @@ Rules:
     if not valid:
         valid = _fallback_quiz(req.topic)[:n]
 
+    topic_key = f"{req.topic}__{req.language}" if req.language != "english" else req.topic
     doc = {
-        "topic":         req.topic,
+        "topic":         topic_key,
+        "topic_base":    req.topic,
+        "language":      req.language,
         "questions":     valid,
         "generated_at":  datetime.utcnow().isoformat(),
         "num_questions": len(valid),
     }
     try:
         if await mongo_svc.is_available():
-            await mongo_svc.db.quiz_questions.replace_one({"topic": req.topic}, doc, upsert=True)
+            await mongo_svc.db.quiz_questions.replace_one({"topic": topic_key}, doc, upsert=True)
     except Exception:
         pass
 
@@ -312,26 +321,37 @@ def _fallback_quiz(topic: str) -> list:
 # ── Fetch notes & quiz ────────────────────────────────────────────────────────
 
 @router.get("/api/content/notes/{topic}")
-async def get_notes(topic: str):
+async def get_notes(topic: str, lang: str = "english"):
     from app import mongo_svc
+    topic_key = f"{topic}__{lang}" if lang != "english" else topic
     try:
         if await mongo_svc.is_available():
-            doc = await mongo_svc.db.notes.find_one({"topic": topic}, {"_id": 0})
+            doc = await mongo_svc.db.notes.find_one({"topic": topic_key}, {"_id": 0})
             if doc:
                 return JSONResponse(doc)
+            # Fallback to English if lang-specific not found
+            if lang != "english":
+                doc = await mongo_svc.db.notes.find_one({"topic": topic}, {"_id": 0})
+                if doc:
+                    return JSONResponse(doc)
     except Exception:
         pass
     return JSONResponse({"notes": None, "topic": topic})
 
 
 @router.get("/api/content/quiz/{topic}")
-async def get_quiz(topic: str):
+async def get_quiz(topic: str, lang: str = "english"):
     from app import mongo_svc
+    topic_key = f"{topic}__{lang}" if lang != "english" else topic
     try:
         if await mongo_svc.is_available():
-            doc = await mongo_svc.db.quiz_questions.find_one({"topic": topic}, {"_id": 0})
+            doc = await mongo_svc.db.quiz_questions.find_one({"topic": topic_key}, {"_id": 0})
             if doc:
                 return JSONResponse(doc)
+            if lang != "english":
+                doc = await mongo_svc.db.quiz_questions.find_one({"topic": topic}, {"_id": 0})
+                if doc:
+                    return JSONResponse(doc)
     except Exception:
         pass
     return JSONResponse({"questions": [], "topic": topic})

@@ -25,10 +25,8 @@
 
     html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); }
 
-    /* ── SCREENS ── */
     .screen { min-height: 100vh; }
 
-    /* ── LOGIN ── */
     #screen-login {
       display: flex; align-items: center; justify-content: center;
       background: radial-gradient(ellipse at 50% 30%, #0f3460 0%, #1a1a2e 70%);
@@ -49,37 +47,38 @@
     .login-box input::placeholder { color: var(--muted); }
     .login-btn {
       background: var(--primary); color: #fff; border: none; border-radius: 10px;
-      padding: 14px; font-size: 1rem; font-weight: 700; cursor: pointer;
-      transition: opacity .2s;
+      padding: 14px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: opacity .2s;
     }
     .login-btn:hover { opacity: 0.85; }
     .login-server { font-size: 0.75rem; color: var(--muted); }
 
-    /* ── APP LAYOUT ── */
-    #screen-app {
-      display: flex; flex-direction: column; height: 100vh; overflow: hidden;
-    }
+    #screen-app { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
 
-    /* ── HEADER ── */
     header {
       background: var(--card); border-bottom: 1px solid var(--border);
-      padding: 12px 16px; display: flex; align-items: center; gap: 12px;
-      flex-shrink: 0;
+      padding: 10px 12px; display: flex; align-items: center; gap: 10px; flex-shrink: 0;
     }
     .hdr-logo { font-weight: 900; font-size: 1.2rem; color: var(--primary); letter-spacing: 2px; }
     .hdr-info { flex: 1; }
     .hdr-name { font-weight: 600; font-size: 0.95rem; }
-    .hdr-id { font-size: 0.75rem; color: var(--muted); }
+    .hdr-id   { font-size: 0.75rem; color: var(--muted); }
     .logout-btn {
       background: none; border: 1px solid var(--border); color: var(--muted);
       border-radius: 8px; padding: 6px 10px; cursor: pointer; font-size: 0.8rem;
     }
     .logout-btn:hover { border-color: var(--primary); color: var(--primary); }
 
-    /* ── MAIN CONTENT ── */
+    /* ── LANG PICKER ── */
+    .lang-strip { display: flex; gap: 3px; flex-shrink: 0; }
+    .lang-btn {
+      border: 1px solid var(--border); background: var(--accent); color: var(--muted);
+      border-radius: 6px; padding: 4px 7px; cursor: pointer;
+      font-size: 0.72rem; font-weight: 700; line-height: 1; transition: all .15s;
+    }
+    .lang-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
     main { flex: 1; overflow-y: auto; padding: 0 0 80px 0; }
 
-    /* ── BOTTOM NAV ── */
     .bottom-nav {
       position: fixed; bottom: 0; left: 0; right: 0;
       background: var(--card); border-top: 1px solid var(--border);
@@ -88,25 +87,21 @@
     .nav-btn {
       flex: 1; background: none; border: none; color: var(--muted);
       padding: 8px 2px 6px; cursor: pointer; font-size: 0.6rem;
-      display: flex; flex-direction: column; align-items: center; gap: 2px;
-      transition: color .2s;
+      display: flex; flex-direction: column; align-items: center; gap: 2px; transition: color .2s;
     }
     .nav-btn .icon { font-size: 1.15rem; }
     .nav-btn.active { color: var(--primary); }
     .nav-btn.active .icon { transform: scale(1.1); }
 
-    /* ── TAB PANEL ── */
     .tab-panel { padding: 16px; animation: fadeIn .2s ease; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
-    /* ── SECTION CARDS ── */
     .s-card {
       background: var(--card); border: 1px solid var(--border);
       border-radius: 14px; padding: 16px; margin-bottom: 14px;
     }
     .s-card h4 { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
 
-    /* ── SUBMIT TAB ── */
     .form-row { margin-bottom: 14px; }
     .form-row label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 6px; letter-spacing: 0.5px; }
     .form-row select, .form-row textarea {
@@ -124,29 +119,19 @@
     .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .submit-btn:not(:disabled):hover { opacity: 0.85; }
 
-    /* ── FINGERPRINT BADGE ── */
     .fp-banner {
       border-radius: 14px; border: 2px solid; padding: 18px 16px;
       margin-bottom: 14px; text-align: center;
     }
-    .fp-type { font-size: 1.6rem; font-weight: 900; letter-spacing: 3px; }
+    .fp-type  { font-size: 1.6rem; font-weight: 900; letter-spacing: 3px; }
     .fp-label { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
-    .fp-desc { font-size: 0.85rem; margin-top: 8px; line-height: 1.5; }
+    .fp-desc  { font-size: 0.85rem; margin-top: 8px; line-height: 1.5; }
 
-    /* ── DRIFT BAR ── */
     .drift-wrap { display: flex; align-items: center; gap: 12px; }
-    .drift-track {
-      flex: 1; height: 14px; background: var(--accent);
-      border-radius: 7px; overflow: hidden;
-    }
-    .drift-fill {
-      height: 100%; border-radius: 7px;
-      background: linear-gradient(90deg, #10b981, #f59e0b, #ef4444);
-      transition: width .8s ease;
-    }
-    .drift-pct { font-size: 1.1rem; font-weight: 700; min-width: 45px; text-align: right; }
+    .drift-track { flex: 1; height: 14px; background: var(--accent); border-radius: 7px; overflow: hidden; }
+    .drift-fill  { height: 100%; border-radius: 7px; background: linear-gradient(90deg, #10b981, #f59e0b, #ef4444); transition: width .8s ease; }
+    .drift-pct   { font-size: 1.1rem; font-weight: 700; min-width: 45px; text-align: right; }
 
-    /* ── NODE CHIPS ── */
     .node-grid { display: flex; flex-wrap: wrap; gap: 8px; }
     .node-chip {
       border-radius: 20px; padding: 5px 12px; font-size: 0.78rem;
@@ -156,8 +141,7 @@
     .node-chip.skipped   { background: rgba(239,68,68,.15);  border-color: var(--invert);  color: var(--invert);  }
     .node-chip.wrong     { background: rgba(245,158,11,.15); border-color: var(--ghost);   color: var(--ghost);   }
 
-    /* ── RESULT TEXT ── */
-    .res-text { line-height: 1.7; font-size: 0.92rem; }
+    .res-text  { line-height: 1.7; font-size: 0.92rem; }
     .followup-q {
       background: rgba(233,69,96,.1); border-left: 3px solid var(--primary);
       border-radius: 0 10px 10px 0; padding: 12px 16px;
@@ -165,85 +149,56 @@
     }
     .empty-state {
       text-align: center; color: var(--muted); padding: 60px 20px;
-      font-size: 0.95rem; line-height: 1.8;
+      font-size: 0.95rem; line-height: 1.8; white-space: pre-line;
     }
     .empty-icon { font-size: 3rem; display: block; margin-bottom: 12px; }
 
-    /* ── PROGRESS TAB ── */
     .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
     .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 10px; text-align: center; }
-    .stat-val { font-size: 1.4rem; font-weight: 800; }
-    .stat-lbl { font-size: 0.7rem; color: var(--muted); margin-top: 3px; }
+    .stat-val  { font-size: 1.4rem; font-weight: 800; }
+    .stat-lbl  { font-size: 0.7rem; color: var(--muted); margin-top: 3px; }
 
     .hist-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
     .hist-table th { color: var(--muted); font-size: 0.72rem; text-transform: uppercase; padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: left; }
     .hist-table td { padding: 10px; border-bottom: 1px solid rgba(34,34,51,.6); }
     .hist-table tr:last-child td { border-bottom: none; }
 
-    /* ── CHAT TAB ── */
-    .chat-wrap { display: flex; flex-direction: column; height: calc(100vh - 180px); }
-    .chat-messages {
-      flex: 1; overflow-y: auto; padding: 16px; display: flex;
-      flex-direction: column; gap: 10px;
-    }
-    .chat-hint { color: var(--muted); text-align: center; font-size: 0.85rem; margin: auto; }
-    .chat-msg { max-width: 85%; padding: 10px 14px; border-radius: 14px; font-size: 0.9rem; line-height: 1.5; }
-    .chat-msg.user { align-self: flex-end; background: var(--primary); color: #fff; border-radius: 14px 14px 4px 14px; }
+    .chat-wrap     { display: flex; flex-direction: column; height: calc(100vh - 180px); }
+    .chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+    .chat-hint { color: var(--muted); text-align: center; font-size: 0.85rem; margin: auto; white-space: pre-line; }
+    .chat-msg  { max-width: 85%; padding: 10px 14px; border-radius: 14px; font-size: 0.9rem; line-height: 1.5; }
+    .chat-msg.user      { align-self: flex-end; background: var(--primary); color: #fff; border-radius: 14px 14px 4px 14px; }
     .chat-msg.assistant { align-self: flex-start; background: var(--card); border: 1px solid var(--border); border-radius: 14px 14px 14px 4px; }
-    .chat-msg.system { align-self: center; background: none; color: var(--muted); font-size: 0.8rem; }
-    .chat-msg.loading { opacity: 0.6; }
+    .chat-msg.system    { align-self: center; background: none; color: var(--muted); font-size: 0.8rem; }
+    .chat-msg.loading   { opacity: 0.6; }
 
-    .img-preview-bar {
-      padding: 8px 16px; background: var(--accent); border-top: 1px solid var(--border);
-      display: flex; align-items: center; gap: 10px;
-    }
+    .img-preview-bar { padding: 8px 16px; background: var(--accent); border-top: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
     .img-preview-bar img { height: 50px; border-radius: 6px; object-fit: cover; }
     .img-clear { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1.2rem; }
 
-    .chat-bar {
-      padding: 10px 12px; background: var(--card); border-top: 1px solid var(--border);
-      display: flex; align-items: center; gap: 8px; flex-shrink: 0;
-    }
-    .cam-label {
-      width: 40px; height: 40px; background: var(--accent); border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.2rem; cursor: pointer; flex-shrink: 0; border: 1px solid var(--border);
-    }
+    .chat-bar { padding: 10px 12px; background: var(--card); border-top: 1px solid var(--border); display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .cam-label { width: 40px; height: 40px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; flex-shrink: 0; border: 1px solid var(--border); }
     .cam-label:hover { border-color: var(--primary); }
-    .chat-bar input[type=text] {
-      flex: 1; background: var(--accent); border: 1px solid var(--border);
-      border-radius: 10px; padding: 10px 14px; color: var(--text); outline: none; font-size: 0.9rem;
-    }
+    .chat-bar input[type=text] { flex: 1; background: var(--accent); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; color: var(--text); outline: none; font-size: 0.9rem; }
     .chat-bar input[type=text]:focus { border-color: var(--primary); }
-    .send-btn {
-      width: 40px; height: 40px; background: var(--primary); border: none;
-      border-radius: 10px; color: #fff; font-size: 1.1rem; cursor: pointer; flex-shrink: 0;
-    }
+    .send-btn { width: 40px; height: 40px; background: var(--primary); border: none; border-radius: 10px; color: #fff; font-size: 1.1rem; cursor: pointer; flex-shrink: 0; }
 
-    /* ── NOTES TAB ── */
     .notes-text { font-size: .9rem; line-height: 1.95; white-space: pre-wrap; color: var(--text); }
 
-    /* ── QUIZ TAB ── */
     .quiz-q-wrap  { margin-bottom: 14px; }
     .quiz-q-label { font-weight: 700; font-size: .9rem; line-height: 1.5; margin-bottom: 10px; }
     .quiz-opts    { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .quiz-opt-btn {
-      background: var(--accent); border: 1px solid var(--border);
-      border-radius: 10px; padding: 10px 12px; color: var(--text);
-      font-size: .82rem; cursor: pointer; text-align: left;
-      transition: all .15s; line-height: 1.4;
-    }
+    .quiz-opt-btn { background: var(--accent); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; color: var(--text); font-size: .82rem; cursor: pointer; text-align: left; transition: all .15s; line-height: 1.4; }
     .quiz-opt-btn:hover        { border-color: var(--primary); }
-    .quiz-opt-btn.sel          { border-color: var(--primary);   background: rgba(233,69,96,.15);  color: var(--primary);  }
-    .quiz-opt-btn.correct-ans  { border-color: var(--fragment);  background: rgba(16,185,129,.15); color: var(--fragment); pointer-events:none; }
-    .quiz-opt-btn.wrong-ans    { border-color: var(--invert);    background: rgba(239,68,68,.15);  color: var(--invert);   pointer-events:none; }
-    .quiz-expl { font-size: .78rem; color: var(--muted); margin-top: 8px; line-height: 1.5; font-style: italic; }
+    .quiz-opt-btn.sel          { border-color: var(--primary);  background: rgba(233,69,96,.15); color: var(--primary); }
+    .quiz-opt-btn.correct-ans  { border-color: var(--fragment); background: rgba(16,185,129,.15); color: var(--fragment); pointer-events:none; }
+    .quiz-opt-btn.wrong-ans    { border-color: var(--invert);   background: rgba(239,68,68,.15);  color: var(--invert);  pointer-events:none; }
+    .quiz-expl  { font-size: .78rem; color: var(--muted); margin-top: 8px; line-height: 1.5; font-style: italic; }
     .score-banner { text-align: center; padding: 20px; }
     .score-big    { font-size: 3rem; font-weight: 900; }
     .score-lbl    { font-size: .85rem; color: var(--muted); margin-top: 4px; }
     .pts-earned   { font-size: 1rem; color: #10b981; font-weight: 700; margin-top: 8px; }
 
-    /* ── LEADERBOARD ── */
     .lb-row  { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid rgba(34,34,51,.6); }
     .lb-row:last-child { border-bottom: none; }
     .lb-rank { font-size: .85rem; font-weight: 800; min-width: 28px; }
@@ -251,17 +206,13 @@
     .lb-pts  { font-size: .82rem; color: var(--muted); }
     .lb-you  { color: var(--primary); }
 
-    /* ── REWARDS ── */
     .pts-hero  { text-align: center; padding: 16px 0 10px; }
     .pts-big   { font-size: 2.8rem; font-weight: 900; color: var(--primary); }
     .pts-unit  { font-size: .8rem; color: var(--muted); }
-    .reward-track { position: relative; height: 8px; background: var(--accent); border-radius: 4px; margin: 16px 0 24px; }
-    .reward-fill  { position: absolute; left: 0; top: 0; height: 100%; border-radius: 4px; background: linear-gradient(90deg,#10b981,#e94560); transition: width .8s ease; }
+    .reward-track      { position: relative; height: 8px; background: var(--accent); border-radius: 4px; margin: 16px 0 24px; }
+    .reward-fill       { position: absolute; left: 0; top: 0; height: 100%; border-radius: 4px; background: linear-gradient(90deg,#10b981,#e94560); transition: width .8s ease; }
     .reward-milestones { display: flex; flex-direction: column; gap: 8px; }
-    .reward-row {
-      display: flex; align-items: center; gap: 10px; padding: 10px 12px;
-      border-radius: 10px; border: 1px solid var(--border); background: var(--accent);
-    }
+    .reward-row  { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--accent); }
     .reward-row.unlocked { border-color: currentColor; }
     .reward-pts  { font-size: .72rem; font-weight: 800; min-width: 44px; }
     .reward-info { flex: 1; }
@@ -269,23 +220,16 @@
     .reward-val  { font-size: .75rem; color: var(--muted); }
     .reward-tick { font-size: 1rem; }
 
-    /* ── CLASSMATE CARDS ── */
     .classmate-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .classmate-card {
-      background: var(--accent); border: 1px solid var(--border);
-      border-radius: 12px; padding: 12px; cursor: pointer;
-      transition: border-color .2s;
-    }
+    .classmate-card { background: var(--accent); border: 1px solid var(--border); border-radius: 12px; padding: 12px; cursor: pointer; transition: border-color .2s; }
     .classmate-card:hover { border-color: var(--primary); }
-    .classmate-name { font-weight: 700; font-size: 0.88rem; margin-bottom: 4px; }
-    .classmate-meta { font-size: 0.75rem; color: var(--muted); margin-bottom: 6px; }
-    .classmate-fp { font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 10px; border: 1px solid; display: inline-block; }
+    .classmate-name  { font-weight: 700; font-size: 0.88rem; margin-bottom: 4px; }
+    .classmate-meta  { font-size: 0.75rem; color: var(--muted); margin-bottom: 6px; }
+    .classmate-fp    { font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 10px; border: 1px solid; display: inline-block; }
     .classmate-drift { font-size: 0.72rem; color: var(--muted); margin-left: 6px; }
 
-    /* ── UTILS ── */
     .pill { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
 
-    /* ── RESPONSIVE ── */
     @media (min-width: 600px) {
       .login-box { width: 400px; }
       #screen-app { max-width: 600px; margin: 0 auto; }
@@ -295,7 +239,7 @@
 </head>
 <body>
 
-<!-- ══════════════ FACE VERIFICATION GATE ══════════════ -->
+<!-- ══════════════ FACE GATE ══════════════ -->
 <div id="face-gate" style="position:fixed;inset:0;z-index:9999;background:#0a0a14;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;font-family:'Inter',sans-serif">
   <div style="font-size:30px;font-weight:900;color:#6366f1;letter-spacing:5px">ARK</div>
   <div style="font-size:12px;color:#64748b;margin-top:-10px">Student Portal — Identity Verification</div>
@@ -312,15 +256,10 @@
     Not you? <span id="sgate-manual-btn" style="color:#6366f1;cursor:pointer;text-decoration:underline" onclick="skipGate()">Enter ID manually</span>
   </div>
 </div>
-
 <script>
 (function () {
-  // Skip gate if coming from face recognition redirect
   const _p = new URLSearchParams(window.location.search);
-  if (_p.get('auto_name')) {
-    document.getElementById('face-gate').remove();
-    return;
-  }
+  if (_p.get('auto_name')) { document.getElementById('face-gate').remove(); return; }
 
   const gate   = document.getElementById('face-gate');
   const video  = document.getElementById('sgate-video');
@@ -341,10 +280,7 @@
       setStatus('Look at the camera to verify your identity');
       interval = setInterval(scan, 2500);
     })
-    .catch(() => {
-      setStatus('Camera unavailable — enter ID manually', '#f59e0b');
-      setTimeout(() => gate.remove(), 2000);
-    });
+    .catch(() => { setStatus('Camera unavailable — enter ID manually', '#f59e0b'); setTimeout(() => gate.remove(), 2000); });
 
   async function scan() {
     if (scanning || granted) return;
@@ -357,12 +293,10 @@
         fd.append('image', blob, 'frame.jpg');
         const r = await fetch('/api/identify', { method: 'POST', body: fd });
         const d = await r.json();
-
         if (d.access_granted) {
           if (d.role === 'student') {
             granted = true; clearInterval(interval);
             setStatus(`Welcome, ${d.name}!`, '#10b981'); setBox('#10b981');
-            // Auto-login: populate and submit via URL redirect
             const name = encodeURIComponent(d.name);
             const id   = d.ark_id || '';
             setTimeout(() => { window.location.href = `/student?auto_id=${id}&auto_name=${name}`; }, 800);
@@ -386,41 +320,47 @@
 })();
 </script>
 
-<!-- ══════════════ LOGIN SCREEN ══════════════ -->
+<!-- ══════════════ LOGIN ══════════════ -->
 <div id="screen-login" class="screen">
   <div class="login-box">
     <div class="login-logo">ARK</div>
-    <p class="login-subtitle">Classroom Comprehension System</p>
+    <p class="login-subtitle" data-i18n="login_subtitle">Classroom Comprehension System</p>
 
-    <input id="inp-id"   type="text" placeholder="Student ID  (e.g. S01)" autocomplete="off" />
-    <input id="inp-name" type="text" placeholder="Your Name" autocomplete="name" />
+    <input id="inp-id"   type="text" data-i18n="login_id_ph" data-i18n-attr="placeholder" placeholder="Student ID  (e.g. S01)" autocomplete="off" />
+    <input id="inp-name" type="text" data-i18n="login_name_ph" data-i18n-attr="placeholder" placeholder="Your Name" autocomplete="name" />
 
-    <button class="login-btn" onclick="doLogin()">Enter Class →</button>
+    <button class="login-btn" onclick="doLogin()" data-i18n="login_btn">Enter Class →</button>
     <p class="login-server">Connected to: <span id="srv-label"></span></p>
   </div>
 </div>
 
-<!-- ══════════════ MAIN APP ══════════════ -->
+<!-- ══════════════ APP ══════════════ -->
 <div id="screen-app" class="screen" hidden>
 
   <header>
     <div class="hdr-logo">ARK</div>
     <div class="hdr-info">
       <div class="hdr-name" id="hdr-name"></div>
-      <div class="hdr-id" id="hdr-id"></div>
+      <div class="hdr-id"   id="hdr-id"></div>
     </div>
-    <button class="logout-btn" onclick="doLogout()">Sign out</button>
+    <div class="lang-strip">
+      <button class="lang-btn active" data-lang="en" onclick="setLang('en')">EN</button>
+      <button class="lang-btn"        data-lang="hi" onclick="setLang('hi')">हि</button>
+      <button class="lang-btn"        data-lang="kn" onclick="setLang('kn')">ಕ</button>
+    </div>
+    <button class="logout-btn" onclick="doLogout()" data-i18n="logout_btn">Sign out</button>
   </header>
+
   <div id="teacher-presence-banner" style="display:none;background:#0f3460;color:#93c5fd;font-size:0.8rem;padding:6px 16px;text-align:center;flex-shrink:0"></div>
 
   <main>
 
-    <!-- ── SUBMIT TAB ── -->
+    <!-- ── SUBMIT ── -->
     <section id="tab-submit" class="tab-panel">
       <div class="s-card" style="margin-bottom:14px">
-        <h4>Submit Your Answer</h4>
+        <h4 data-i18n="submit_title">Submit Your Answer</h4>
         <div class="form-row">
-          <label>TOPIC</label>
+          <label data-i18n="label_topic">TOPIC</label>
           <select id="sel-topic">
             <option value="photosynthesis">Photosynthesis</option>
             <option value="water_cycle">Water Cycle</option>
@@ -428,35 +368,34 @@
           </select>
         </div>
         <div class="form-row">
-          <label>LANGUAGE</label>
-          <select id="sel-lang">
+          <label data-i18n="label_language">LANGUAGE</label>
+          <select id="sel-lang" onchange="onLangSelectChange(this.value)">
             <option value="english">English</option>
-            <option value="hindi">Hindi</option>
-            <option value="kannada">Kannada</option>
+            <option value="hindi">Hindi / हिंदी</option>
+            <option value="kannada">Kannada / ಕನ್ನಡ</option>
           </select>
         </div>
         <div class="form-row">
-          <label>YOUR EXPLANATION</label>
-          <textarea id="inp-answer" placeholder="Explain the topic in your own words. Be as detailed as you can — there are no wrong attempts, only gaps we can fix."></textarea>
+          <label data-i18n="label_answer">YOUR EXPLANATION</label>
+          <textarea id="inp-answer" data-i18n="answer_ph" data-i18n-attr="placeholder"
+            placeholder="Explain the topic in your own words. Be as detailed as you can — there are no wrong attempts, only gaps we can fix."></textarea>
         </div>
-        <button class="submit-btn" id="btn-submit" onclick="submitAnswer()">
-          Analyse My Answer →
-        </button>
+        <button class="submit-btn" id="btn-submit" onclick="submitAnswer()" data-i18n="submit_btn">Analyse My Answer →</button>
       </div>
 
       <div class="s-card">
-        <h4>How It Works</h4>
-        <p style="font-size:.85rem;color:var(--muted);line-height:1.8">
+        <h4 data-i18n="how_works_title">How It Works</h4>
+        <p style="font-size:.85rem;color:var(--muted);line-height:1.8" data-i18n="how_works_text">
           ARK maps your answer against a concept graph and identifies exactly which piece of understanding is missing.
           Lower drift = better understanding. Your teacher sees your result live on their dashboard.
         </p>
       </div>
     </section>
 
-    <!-- ── NOTES TAB ── -->
+    <!-- ── NOTES ── -->
     <section id="tab-notes" class="tab-panel" hidden>
       <div class="form-row" style="margin-bottom:14px">
-        <label>TOPIC</label>
+        <label data-i18n="label_topic">TOPIC</label>
         <select id="notes-topic-sel" onchange="loadNotes(this.value)">
           <option value="photosynthesis">Photosynthesis</option>
           <option value="water_cycle">Water Cycle</option>
@@ -466,21 +405,24 @@
 
       <div id="notes-empty" class="empty-state" hidden>
         <span class="empty-icon">📖</span>
-        No notes for this topic yet.<br>Ask your teacher to generate notes from the Content Lab.
+        <span id="notes-empty-msg">No notes for this topic yet.</span>
       </div>
-      <div id="notes-loading" class="empty-state" hidden>Loading notes...</div>
+      <div id="notes-loading" class="empty-state" hidden>
+        <span class="empty-icon" style="font-size:1.5rem">⏳</span>
+        <span id="notes-loading-msg">Generating notes in your language…</span>
+      </div>
 
       <div id="notes-box" class="s-card" hidden>
-        <h4>Class Notes — <span id="notes-topic-disp"></span></h4>
+        <h4><span data-i18n="notes_box_label">Class Notes — </span><span id="notes-topic-disp"></span></h4>
         <div class="notes-text" id="notes-body"></div>
         <div id="notes-date" style="font-size:.7rem;color:var(--muted);margin-top:12px"></div>
       </div>
     </section>
 
-    <!-- ── QUIZ TAB ── -->
+    <!-- ── QUIZ ── -->
     <section id="tab-quiz" class="tab-panel" hidden>
       <div class="form-row" style="margin-bottom:14px">
-        <label>TOPIC</label>
+        <label data-i18n="label_topic">TOPIC</label>
         <select id="quiz-topic-sel" onchange="loadQuiz(this.value)">
           <option value="photosynthesis">Photosynthesis</option>
           <option value="water_cycle">Water Cycle</option>
@@ -490,151 +432,136 @@
 
       <div id="quiz-empty" class="empty-state" hidden>
         <span class="empty-icon">❓</span>
-        No quiz for this topic yet.<br>Ask your teacher to generate one.
+        <span id="quiz-empty-msg">No quiz for this topic yet.</span>
       </div>
-      <div id="quiz-loading" class="empty-state" hidden>Loading quiz...</div>
+      <div id="quiz-loading" class="empty-state" hidden>
+        <span class="empty-icon" style="font-size:1.5rem">⏳</span>
+        <span id="quiz-loading-msg">Generating quiz in your language…</span>
+      </div>
 
       <div id="quiz-active" hidden>
         <div id="quiz-questions-wrap"></div>
         <div style="padding:0 0 16px">
-          <button class="submit-btn" id="quiz-submit-btn" onclick="submitQuiz()">Submit Quiz →</button>
+          <button class="submit-btn" id="quiz-submit-btn" onclick="submitQuiz()" data-i18n="quiz_submit_btn">Submit Quiz →</button>
         </div>
       </div>
 
       <div id="quiz-done" class="s-card" hidden>
         <div class="score-banner">
           <div class="score-big" id="score-fraction"></div>
-          <div class="score-lbl">questions correct</div>
+          <div class="score-lbl" id="score-lbl-el" data-i18n="score_lbl">questions correct</div>
           <div class="pts-earned" id="score-pts"></div>
         </div>
         <div id="quiz-review"></div>
-        <button class="submit-btn" onclick="resetQuiz()" style="margin-top:12px">Try Again →</button>
+        <button class="submit-btn" onclick="resetQuiz()" style="margin-top:12px" data-i18n="try_again">Try Again →</button>
       </div>
     </section>
 
-    <!-- ── RESULT TAB ── -->
+    <!-- ── RESULT ── -->
     <section id="tab-result" class="tab-panel" hidden>
       <div id="result-empty" class="empty-state">
         <span class="empty-icon">🎯</span>
-        Submit an answer on the <strong>Submit</strong> tab<br>to see your gap analysis here.
+        <span data-i18n="result_empty">Submit an answer on the Submit tab to see your gap analysis here.</span>
       </div>
 
       <div id="result-content" hidden>
-
-        <!-- Fingerprint banner -->
         <div class="fp-banner" id="fp-banner">
           <div class="fp-type" id="fp-type"></div>
-          <div class="fp-label">COMPREHENSION FINGERPRINT</div>
+          <div class="fp-label" data-i18n="fp_label">COMPREHENSION FINGERPRINT</div>
           <div class="fp-desc" id="fp-desc"></div>
         </div>
 
-        <!-- Concept map -->
         <div class="s-card">
-          <h4>Concept Map — What You Covered</h4>
+          <h4 data-i18n="concept_map_title">Concept Map — What You Covered</h4>
           <div class="node-grid" id="node-grid"></div>
         </div>
 
-        <!-- Drift score -->
         <div class="s-card">
-          <h4>Drift Score (lower is better)</h4>
+          <h4 data-i18n="drift_title">Drift Score (lower is better)</h4>
           <div class="drift-wrap">
             <div class="drift-track"><div class="drift-fill" id="drift-fill" style="width:0%"></div></div>
             <div class="drift-pct" id="drift-pct">0%</div>
           </div>
         </div>
 
-        <!-- What's wrong -->
         <div class="s-card">
-          <h4>Your Specific Gap</h4>
+          <h4 data-i18n="gap_title">Your Specific Gap</h4>
           <p class="res-text" id="res-wrong"></p>
         </div>
 
-        <!-- Story fix -->
         <div class="s-card">
-          <h4>Think of It This Way</h4>
+          <h4 data-i18n="story_title">Think of It This Way</h4>
           <p class="res-text" id="res-story"></p>
         </div>
 
-        <!-- Follow-up -->
         <div class="s-card">
-          <h4>Follow-Up Question For You</h4>
+          <h4 data-i18n="followup_title">Follow-Up Question For You</h4>
           <div class="followup-q" id="res-followup"></div>
         </div>
 
-        <!-- Ask a Classmate -->
         <div class="s-card" id="classmates-card" hidden>
-          <h4>Ask a Classmate</h4>
-          <p style="font-size:.8rem;color:var(--muted);margin-bottom:12px">
+          <h4 data-i18n="classmates_title">Ask a Classmate</h4>
+          <p style="font-size:.8rem;color:var(--muted);margin-bottom:12px" data-i18n="classmates_desc">
             These classmates answered the same topic — find one who got a different fingerprint and ask them how they understood it.
           </p>
           <div id="classmates-grid"></div>
         </div>
-
       </div>
     </section>
 
-    <!-- ── PROGRESS TAB ── -->
+    <!-- ── PROGRESS ── -->
     <section id="tab-progress" class="tab-panel" hidden>
-
       <div id="prog-empty" class="empty-state" hidden>
         <span class="empty-icon">📈</span>
-        No submission history yet.<br>Submit answers to track your progress.
+        <span data-i18n="prog_empty_msg">No submission history yet.\nSubmit answers to track your progress.</span>
       </div>
 
       <div id="prog-content">
         <div class="stats-row" id="stats-row"></div>
 
         <div class="s-card">
-          <h4>Drift Over Time (lower = better)</h4>
+          <h4 id="drift-chart-h4" data-i18n="drift_chart_title">Drift Over Time (lower = better)</h4>
           <canvas id="progress-chart" height="180"></canvas>
         </div>
 
         <div class="s-card" id="gap-analysis-card" hidden>
-          <h4>Your Knowledge Gaps</h4>
+          <h4 data-i18n="gap_card_title">Your Knowledge Gaps</h4>
           <div id="gap-nodes"></div>
         </div>
 
-        <!-- Rewards / Points -->
         <div class="s-card">
-          <h4>Your Points &amp; Rewards</h4>
+          <h4 data-i18n="rewards_title">Your Points &amp; Rewards</h4>
           <div class="pts-hero">
             <div class="pts-big" id="pts-big">0</div>
-            <div class="pts-unit">points earned</div>
+            <div class="pts-unit" data-i18n="pts_unit">points earned</div>
           </div>
-          <div class="reward-track">
-            <div class="reward-fill" id="reward-fill" style="width:0%"></div>
-          </div>
+          <div class="reward-track"><div class="reward-fill" id="reward-fill" style="width:0%"></div></div>
           <div class="reward-milestones" id="reward-milestones"></div>
         </div>
 
-        <!-- Class Leaderboard -->
         <div class="s-card">
-          <h4>Class Leaderboard</h4>
-          <div id="leaderboard-list">
-            <p style="color:var(--muted);font-size:.85rem">Loading...</p>
-          </div>
+          <h4 data-i18n="lb_title">Class Leaderboard</h4>
+          <div id="leaderboard-list"><p style="color:var(--muted);font-size:.85rem" data-i18n="loading">Loading...</p></div>
         </div>
 
         <div class="s-card">
-          <h4>Submission History</h4>
+          <h4 data-i18n="hist_title">Submission History</h4>
           <div id="hist-table-wrap"></div>
         </div>
       </div>
-
     </section>
 
-    <!-- ── CHAT TAB ── -->
+    <!-- ── CHAT ── -->
     <section id="tab-chat" class="tab-panel" style="padding:0" hidden>
       <div class="chat-wrap">
         <div class="chat-messages" id="chat-messages">
-          <div class="chat-hint">
-            📷 Upload a diagram or image from your textbook<br>then ask a question about it.
-          </div>
+          <div class="chat-hint" id="chat-hint-el" data-i18n="chat_hint">📷 Upload a diagram or image from your textbook
+then ask a question about it.</div>
         </div>
 
         <div class="img-preview-bar" id="img-bar" hidden>
           <img id="img-preview" alt="selected" />
-          <span style="flex:1;font-size:.8rem;color:var(--muted)">Image selected</span>
+          <span style="flex:1;font-size:.8rem;color:var(--muted)" data-i18n="img_selected">Image selected</span>
           <button class="img-clear" onclick="clearImage()">✕</button>
         </div>
 
@@ -643,7 +570,7 @@
             📷
             <input type="file" id="img-pick" accept="image/*" capture="environment" hidden onchange="handleImage(event)" />
           </label>
-          <input type="text" id="chat-inp" placeholder="Ask about the image…" />
+          <input type="text" id="chat-inp" data-i18n="chat_ph" data-i18n-attr="placeholder" placeholder="Ask about the image…" />
           <button class="send-btn" onclick="sendChat()">➤</button>
         </div>
       </div>
@@ -653,22 +580,22 @@
 
   <nav class="bottom-nav">
     <button class="nav-btn active" onclick="switchTab('submit', this)">
-      <span class="icon">✏️</span><span>Submit</span>
+      <span class="icon">✏️</span><span data-i18n="nav_submit">Submit</span>
     </button>
     <button class="nav-btn" onclick="switchTab('notes', this)">
-      <span class="icon">📖</span><span>Notes</span>
+      <span class="icon">📖</span><span data-i18n="nav_notes">Notes</span>
     </button>
     <button class="nav-btn" onclick="switchTab('quiz', this)">
-      <span class="icon">❓</span><span>Quiz</span>
+      <span class="icon">❓</span><span data-i18n="nav_quiz">Quiz</span>
     </button>
     <button class="nav-btn" onclick="switchTab('result', this)">
-      <span class="icon">🎯</span><span>Analysis</span>
+      <span class="icon">🎯</span><span data-i18n="nav_result">Analysis</span>
     </button>
     <button class="nav-btn" onclick="switchTab('progress', this)">
-      <span class="icon">📈</span><span>Progress</span>
+      <span class="icon">📈</span><span data-i18n="nav_progress">Progress</span>
     </button>
     <button class="nav-btn" onclick="switchTab('chat', this)">
-      <span class="icon">💬</span><span>Chat</span>
+      <span class="icon">💬</span><span data-i18n="nav_chat">Chat</span>
     </button>
   </nav>
 
@@ -676,13 +603,285 @@
 
 <script>
 // ══════════════════════════════════════════════
+// i18n — strings for EN / HI / KN
+// ══════════════════════════════════════════════
+const STRINGS = {
+  en: {
+    login_subtitle:  'Classroom Comprehension System',
+    login_id_ph:     'Student ID  (e.g. S01)',
+    login_name_ph:   'Your Name',
+    login_btn:       'Enter Class →',
+    logout_btn:      'Sign out',
+    nav_submit:      'Submit',
+    nav_notes:       'Notes',
+    nav_quiz:        'Quiz',
+    nav_result:      'Analysis',
+    nav_progress:    'Progress',
+    nav_chat:        'Chat',
+    submit_title:    'Submit Your Answer',
+    label_topic:     'TOPIC',
+    label_language:  'LANGUAGE',
+    label_answer:    'YOUR EXPLANATION',
+    answer_ph:       'Explain the topic in your own words. Be as detailed as you can — there are no wrong attempts, only gaps we can fix.',
+    submit_btn:      'Analyse My Answer →',
+    how_works_title: 'How It Works',
+    how_works_text:  'ARK maps your answer against a concept graph and identifies exactly which piece of understanding is missing. Lower drift = better understanding. Your teacher sees your result live on their dashboard.',
+    fp_label:        'COMPREHENSION FINGERPRINT',
+    concept_map_title: 'Concept Map — What You Covered',
+    drift_title:     'Drift Score (lower is better)',
+    gap_title:       'Your Specific Gap',
+    story_title:     'Think of It This Way',
+    followup_title:  'Follow-Up Question For You',
+    classmates_title:'Ask a Classmate',
+    classmates_desc: 'These classmates answered the same topic — find one who got a different fingerprint and ask them how they understood it.',
+    result_empty:    'Submit an answer on the Submit tab to see your gap analysis here.',
+    notes_box_label: 'Class Notes — ',
+    generated_at:    'Generated: ',
+    quiz_submit_btn: 'Submit Quiz →',
+    quiz_submitting: 'Submitting...',
+    score_lbl:       'questions correct',
+    try_again:       'Try Again →',
+    chat_hint:       '📷 Upload a diagram or image from your textbook\nthen ask a question about it.',
+    chat_ph:         'Ask about the image…',
+    img_selected:    'Image selected',
+    analysing:       'Analysing… please wait',
+    prog_submissions:'Submissions',
+    prog_latest:     'Latest Type',
+    prog_avg_drift:  'Avg Drift',
+    drift_chart_title:'Drift Over Time (lower = better)',
+    gap_card_title:  'Your Knowledge Gaps',
+    pts_unit:        'points earned',
+    rewards_title:   'Your Points & Rewards',
+    lb_title:        'Class Leaderboard',
+    lb_empty:        'No leaderboard data yet.',
+    hist_title:      'Submission History',
+    hist_date:       'Date',
+    hist_topic:      'Topic',
+    hist_type:       'Type',
+    hist_drift:      'Drift',
+    pts_suffix:      'points earned!',
+    explanation_lbl: 'Explanation: ',
+    loading:         'Loading...',
+    prog_empty_msg:  'No submission history yet.\nSubmit answers to track your progress.',
+    teacher_present: 'is present today',
+    notes_generating:'Generating notes in your language… please wait',
+    notes_ask_teacher:'Notes could not be auto-generated. Ask your teacher to add notes from the Content Lab.',
+    quiz_generating: 'Generating quiz in your language… please wait',
+    quiz_ask_teacher:'Quiz could not be auto-generated. Ask your teacher to create a quiz.',
+    unanswered:      'You have {n} unanswered question(s). Submit anyway?',
+    signout_confirm: 'Sign out? Your progress is saved on the server.',
+    lang_prefix_hi:  '',
+    lang_prefix_kn:  '',
+  },
+  hi: {
+    login_subtitle:  'कक्षा बोध प्रणाली',
+    login_id_ph:     'छात्र आईडी (जैसे S01)',
+    login_name_ph:   'आपका नाम',
+    login_btn:       'कक्षा में प्रवेश करें →',
+    logout_btn:      'बाहर जाएं',
+    nav_submit:      'जमा करें',
+    nav_notes:       'नोट्स',
+    nav_quiz:        'प्रश्नोत्तरी',
+    nav_result:      'विश्लेषण',
+    nav_progress:    'प्रगति',
+    nav_chat:        'चैट',
+    submit_title:    'अपना उत्तर जमा करें',
+    label_topic:     'विषय',
+    label_language:  'भाषा',
+    label_answer:    'आपकी व्याख्या',
+    answer_ph:       'विषय को अपने शब्दों में समझाएं। जितना हो सके विस्तृत लिखें — कोई गलत प्रयास नहीं है, केवल वे कमियां हैं जो हम ठीक कर सकते हैं।',
+    submit_btn:      'मेरे उत्तर का विश्लेषण करें →',
+    how_works_title: 'यह कैसे काम करता है',
+    how_works_text:  'ARK आपके उत्तर को एक अवधारणा ग्राफ से तुलना करता है और पहचानता है कि समझ का कौन सा हिस्सा गायब है। कम ड्रिफ्ट = बेहतर समझ। आपके शिक्षक आपका परिणाम सीधे अपने डैशबोर्ड पर देखते हैं।',
+    fp_label:        'समझ का फिंगरप्रिंट',
+    concept_map_title:'अवधारणा मानचित्र — आपने क्या कवर किया',
+    drift_title:     'ड्रिफ्ट स्कोर (कम बेहतर है)',
+    gap_title:       'आपका विशिष्ट अंतर',
+    story_title:     'इस तरह सोचें',
+    followup_title:  'आपके लिए अनुवर्ती प्रश्न',
+    classmates_title:'सहपाठी से पूछें',
+    classmates_desc: 'इन सहपाठियों ने एक ही विषय का उत्तर दिया — जिसे अलग फिंगरप्रिंट मिला उससे पूछें कि उसने इसे कैसे समझा।',
+    result_empty:    'अपना गैप विश्लेषण देखने के लिए "जमा करें" टैब पर उत्तर दें।',
+    notes_box_label: 'कक्षा नोट्स — ',
+    generated_at:    'बनाया गया: ',
+    quiz_submit_btn: 'प्रश्नोत्तरी जमा करें →',
+    quiz_submitting: 'जमा हो रहा है...',
+    score_lbl:       'प्रश्न सही',
+    try_again:       'फिर से प्रयास करें →',
+    chat_hint:       '📷 अपनी पाठ्यपुस्तक से चित्र या आरेख अपलोड करें\nफिर उसके बारे में प्रश्न पूछें।',
+    chat_ph:         'चित्र के बारे में पूछें…',
+    img_selected:    'चित्र चुना गया',
+    analysing:       'विश्लेषण हो रहा है… कृपया प्रतीक्षा करें',
+    prog_submissions:'प्रस्तुतियां',
+    prog_latest:     'नवीनतम प्रकार',
+    prog_avg_drift:  'औसत ड्रिफ्ट',
+    drift_chart_title:'समय के साथ ड्रिफ्ट (कम = बेहतर)',
+    gap_card_title:  'आपके ज्ञान के अंतर',
+    pts_unit:        'अर्जित अंक',
+    rewards_title:   'आपके अंक और पुरस्कार',
+    lb_title:        'कक्षा लीडरबोर्ड',
+    lb_empty:        'अभी कोई लीडरबोर्ड डेटा नहीं।',
+    hist_title:      'जमा करने का इतिहास',
+    hist_date:       'तिथि',
+    hist_topic:      'विषय',
+    hist_type:       'प्रकार',
+    hist_drift:      'ड्रिफ्ट',
+    pts_suffix:      'अंक अर्जित!',
+    explanation_lbl: 'व्याख्या: ',
+    loading:         'लोड हो रहा है...',
+    prog_empty_msg:  'अभी कोई जमा इतिहास नहीं।\nप्रगति ट्रैक करने के लिए उत्तर जमा करें।',
+    teacher_present: 'आज उपस्थित हैं',
+    notes_generating:'आपकी भाषा में नोट्स बन रहे हैं… कृपया प्रतीक्षा करें',
+    notes_ask_teacher:'नोट्स स्वचालित रूप से नहीं बन सके। अपने शिक्षक से Content Lab में नोट्स बनाने के लिए कहें।',
+    quiz_generating: 'आपकी भाषा में प्रश्नोत्तरी बन रही है… कृपया प्रतीक्षा करें',
+    quiz_ask_teacher:'प्रश्नोत्तरी स्वचालित रूप से नहीं बन सकी। अपने शिक्षक से बनाने के लिए कहें।',
+    unanswered:      '{n} प्रश्न अनुत्तरित हैं। फिर भी जमा करें?',
+    signout_confirm: 'बाहर जाएं? आपकी प्रगति सर्वर पर सुरक्षित है।',
+  },
+  kn: {
+    login_subtitle:  'ತರಗತಿ ಗ್ರಹಿಕಾ ವ್ಯವಸ್ಥೆ',
+    login_id_ph:     'ವಿದ್ಯಾರ್ಥಿ ಐಡಿ (ಉದಾ: S01)',
+    login_name_ph:   'ನಿಮ್ಮ ಹೆಸರು',
+    login_btn:       'ತರಗತಿಗೆ ಪ್ರವೇಶಿಸಿ →',
+    logout_btn:      'ನಿರ್ಗಮಿಸಿ',
+    nav_submit:      'ಸಲ್ಲಿಸಿ',
+    nav_notes:       'ಟಿಪ್ಪಣಿಗಳು',
+    nav_quiz:        'ರಸಪ್ರಶ್ನೆ',
+    nav_result:      'ವಿಶ್ಲೇಷಣೆ',
+    nav_progress:    'ಪ್ರಗತಿ',
+    nav_chat:        'ಚಾಟ್',
+    submit_title:    'ನಿಮ್ಮ ಉತ್ತರ ಸಲ್ಲಿಸಿ',
+    label_topic:     'ವಿಷಯ',
+    label_language:  'ಭಾಷೆ',
+    label_answer:    'ನಿಮ್ಮ ವಿವರಣೆ',
+    answer_ph:       'ವಿಷಯವನ್ನು ನಿಮ್ಮ ಮಾತುಗಳಲ್ಲಿ ವಿವರಿಸಿ. ಸಾಧ್ಯವಾದಷ್ಟು ವಿವರವಾಗಿ ಬರೆಯಿರಿ — ತಪ್ಪು ಪ್ರಯತ್ನ ಎಂಬುದಿಲ್ಲ, ಕೇವಲ ನಾವು ಸರಿಪಡಿಸಬಹುದಾದ ಅಂತರಗಳಿವೆ.',
+    submit_btn:      'ನನ್ನ ಉತ್ತರ ವಿಶ್ಲೇಷಿಸಿ →',
+    how_works_title: 'ಇದು ಹೇಗೆ ಕಾರ್ಯ ನಿರ್ವಹಿಸುತ್ತದೆ',
+    how_works_text:  'ARK ನಿಮ್ಮ ಉತ್ತರವನ್ನು ಪರಿಕಲ್ಪನಾ ಗ್ರಾಫ್‌ನೊಂದಿಗೆ ಹೋಲಿಸಿ ಯಾವ ತಿಳಿವಳಿಕೆ ಕಾಣೆಯಾಗಿದೆ ಎಂದು ಗುರುತಿಸುತ್ತದೆ. ಕಡಿಮೆ ಡ್ರಿಫ್ಟ್ = ಉತ್ತಮ ತಿಳಿವಳಿಕೆ. ನಿಮ್ಮ ಶಿಕ್ಷಕರು ನೇರವಾಗಿ ತಮ್ಮ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ನಲ್ಲಿ ನಿಮ್ಮ ಫಲಿತಾಂಶ ನೋಡುತ್ತಾರೆ.',
+    fp_label:        'ಗ್ರಹಿಕಾ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್',
+    concept_map_title:'ಪರಿಕಲ್ಪನಾ ನಕ್ಷೆ — ನೀವು ಏನು ಕವರ್ ಮಾಡಿದ್ದೀರಿ',
+    drift_title:     'ಡ್ರಿಫ್ಟ್ ಸ್ಕೋರ್ (ಕಡಿಮೆ ಉತ್ತಮ)',
+    gap_title:       'ನಿಮ್ಮ ನಿರ್ದಿಷ್ಟ ಅಂತರ',
+    story_title:     'ಹೀಗೆ ಯೋಚಿಸಿ',
+    followup_title:  'ನಿಮಗಾಗಿ ಮುಂದಿನ ಪ್ರಶ್ನೆ',
+    classmates_title:'ಸಹಪಾಠಿಯನ್ನು ಕೇಳಿ',
+    classmates_desc: 'ಈ ಸಹಪಾಠಿಗಳು ಅದೇ ವಿಷಯಕ್ಕೆ ಉತ್ತರಿಸಿದ್ದಾರೆ — ಬೇರೆ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಪಡೆದವರನ್ನು ಹುಡುಕಿ ಅವರು ಹೇಗೆ ಅರ್ಥಮಾಡಿಕೊಂಡರು ಎಂದು ಕೇಳಿ.',
+    result_empty:    'ನಿಮ್ಮ ಗ್ಯಾಪ್ ವಿಶ್ಲೇಷಣೆ ನೋಡಲು ಸಲ್ಲಿಸು ಟ್ಯಾಬ್‌ನಲ್ಲಿ ಉತ್ತರ ಸಲ್ಲಿಸಿ.',
+    notes_box_label: 'ತರಗತಿ ಟಿಪ್ಪಣಿಗಳು — ',
+    generated_at:    'ರಚಿಸಲಾಗಿದೆ: ',
+    quiz_submit_btn: 'ರಸಪ್ರಶ್ನೆ ಸಲ್ಲಿಸಿ →',
+    quiz_submitting: 'ಸಲ್ಲಿಸಲಾಗುತ್ತಿದೆ...',
+    score_lbl:       'ಪ್ರಶ್ನೆಗಳು ಸರಿಯಾಗಿದೆ',
+    try_again:       'ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ →',
+    chat_hint:       '📷 ನಿಮ್ಮ ಪಠ್ಯಪುಸ್ತಕದಿಂದ ಚಿತ್ರ ಅಥವಾ ರೇಖಾಚಿತ್ರ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ\nನಂತರ ಅದರ ಬಗ್ಗೆ ಪ್ರಶ್ನೆ ಕೇಳಿ.',
+    chat_ph:         'ಚಿತ್ರದ ಬಗ್ಗೆ ಕೇಳಿ…',
+    img_selected:    'ಚಿತ್ರ ಆಯ್ಕೆಯಾಗಿದೆ',
+    analysing:       'ವಿಶ್ಲೇಷಿಸಲಾಗುತ್ತಿದೆ… ದಯವಿಟ್ಟು ನಿರೀಕ್ಷಿಸಿ',
+    prog_submissions:'ಸಲ್ಲಿಕೆಗಳು',
+    prog_latest:     'ಇತ್ತೀಚಿನ ಪ್ರಕಾರ',
+    prog_avg_drift:  'ಸರ. ಡ್ರಿಫ್ಟ್',
+    drift_chart_title:'ಸಮಯದ ಮೇಲೆ ಡ್ರಿಫ್ಟ್ (ಕಡಿಮೆ = ಉತ್ತಮ)',
+    gap_card_title:  'ನಿಮ್ಮ ಜ್ಞಾನದ ಅಂತರಗಳು',
+    pts_unit:        'ಗಳಿಸಿದ ಅಂಕಗಳು',
+    rewards_title:   'ನಿಮ್ಮ ಅಂಕಗಳು ಮತ್ತು ಬಹುಮಾನಗಳು',
+    lb_title:        'ತರಗತಿ ಲೀಡರ್‌ಬೋರ್ಡ್',
+    lb_empty:        'ಇನ್ನೂ ಲೀಡರ್‌ಬೋರ್ಡ್ ಡೇಟಾ ಇಲ್ಲ.',
+    hist_title:      'ಸಲ್ಲಿಕೆ ಇತಿಹಾಸ',
+    hist_date:       'ದಿನಾಂಕ',
+    hist_topic:      'ವಿಷಯ',
+    hist_type:       'ಪ್ರಕಾರ',
+    hist_drift:      'ಡ್ರಿಫ್ಟ್',
+    pts_suffix:      'ಅಂಕಗಳು ಗಳಿಸಿದ್ದೀರಿ!',
+    explanation_lbl: 'ವಿವರಣೆ: ',
+    loading:         'ಲೋಡ್ ಆಗುತ್ತಿದೆ...',
+    prog_empty_msg:  'ಇನ್ನೂ ಯಾವುದೇ ಸಲ್ಲಿಕೆ ಇತಿಹಾಸ ಇಲ್ಲ.\nಪ್ರಗತಿ ಟ್ರ್ಯಾಕ್ ಮಾಡಲು ಉತ್ತರ ಸಲ್ಲಿಸಿ.',
+    teacher_present: 'ಇಂದು ಉಪಸ್ಥಿತರಿದ್ದಾರೆ',
+    notes_generating:'ನಿಮ್ಮ ಭಾಷೆಯಲ್ಲಿ ಟಿಪ್ಪಣಿಗಳನ್ನು ರಚಿಸಲಾಗುತ್ತಿದೆ… ದಯವಿಟ್ಟು ನಿರೀಕ್ಷಿಸಿ',
+    notes_ask_teacher:'ಟಿಪ್ಪಣಿಗಳು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ರಚಿಸಲಾಗಲಿಲ್ಲ. ಶಿಕ್ಷಕರನ್ನು Content Lab ನಲ್ಲಿ ರಚಿಸಲು ಕೇಳಿ.',
+    quiz_generating: 'ನಿಮ್ಮ ಭಾಷೆಯಲ್ಲಿ ರಸಪ್ರಶ್ನೆ ರಚಿಸಲಾಗುತ್ತಿದೆ… ದಯವಿಟ್ಟು ನಿರೀಕ್ಷಿಸಿ',
+    quiz_ask_teacher:'ರಸಪ್ರಶ್ನೆ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ರಚಿಸಲಾಗಲಿಲ್ಲ. ಶಿಕ್ಷಕರನ್ನು ರಚಿಸಲು ಕೇಳಿ.',
+    unanswered:      '{n} ಪ್ರಶ್ನೆಗಳಿಗೆ ಉತ್ತರ ನೀಡಿಲ್ಲ. ಸಲ್ಲಿಸುವುದೇ?',
+    signout_confirm: 'ನಿರ್ಗಮಿಸುವುದೇ? ನಿಮ್ಮ ಪ್ರಗತಿ ಸರ್ವರ್‌ನಲ್ಲಿ ಉಳಿಸಲ್ಪಟ್ಟಿದೆ.',
+  },
+};
+
+// Fingerprint descriptions in all 3 languages
+const FP_DESC = {
+  GHOST: {
+    en: 'You hold a strong but completely wrong belief — you are confident but the core idea is incorrect.',
+    hi: 'आप एक मजबूत लेकिन पूरी तरह गलत विश्वास रखते हैं — आप आश्वस्त हैं लेकिन मूल विचार गलत है।',
+    kn: 'ನೀವು ಬಲವಾದ ಆದರೆ ಸಂಪೂರ್ಣ ತಪ್ಪಾದ ನಂಬಿಕೆ ಹೊಂದಿದ್ದೀರಿ — ನೀವು ಆತ್ಮವಿಶ್ವಾಸದಿಂದಿದ್ದೀರಿ ಆದರೆ ಮೂಲ ಕಲ್ಪನೆ ತಪ್ಪಾಗಿದೆ.',
+  },
+  INVERT: {
+    en: 'You have cause and effect reversed — the parts are right but the direction is wrong.',
+    hi: 'आपने कारण और प्रभाव को उलट दिया है — भाग सही हैं लेकिन दिशा गलत है।',
+    kn: 'ನೀವು ಕಾರಣ ಮತ್ತು ಪರಿಣಾಮವನ್ನು ಉಲ್ಟಾ ಮಾಡಿದ್ದೀರಿ — ಭಾಗಗಳು ಸರಿಯಾಗಿದ್ದರೂ ದಿಕ್ಕು ತಪ್ಪಾಗಿದೆ.',
+  },
+  HOLLOW: {
+    en: 'You use the right keywords but cannot explain the mechanism — it sounds right but means nothing.',
+    hi: 'आप सही कीवर्ड का उपयोग करते हैं लेकिन तंत्र को नहीं समझा सकते — सही लगता है लेकिन अर्थ नहीं।',
+    kn: 'ನೀವು ಸರಿಯಾದ ಕೀವರ್ಡ್‌ಗಳನ್ನು ಬಳಸುತ್ತೀರಿ ಆದರೆ ಕಾರ್ಯವಿಧಾನವನ್ನು ವಿವರಿಸಲು ಆಗುವುದಿಲ್ಲ — ಸರಿ ಎನಿಸುತ್ತದೆ ಆದರೆ ಅರ್ಥ ತಿಳಿಯುವುದಿಲ್ಲ.',
+  },
+  FRAGMENT: {
+    en: 'You understand part of the chain correctly but one key link is missing.',
+    hi: 'आप श्रृंखला के एक भाग को सही समझते हैं लेकिन एक महत्वपूर्ण कड़ी गायब है।',
+    kn: 'ನೀವು ಸರಪಳಿಯ ಒಂದು ಭಾಗವನ್ನು ಸರಿಯಾಗಿ ಅರ್ಥಮಾಡಿಕೊಂಡಿದ್ದೀರಿ ಆದರೆ ಒಂದು ಮುಖ್ಯ ಕೊಂಡಿ ತಪ್ಪಿದೆ.',
+  },
+  ORPHAN: {
+    en: 'A prerequisite concept is missing, which causes confusion about everything that follows.',
+    hi: 'एक पूर्वापेक्षित अवधारणा गायब है, जो बाद की हर चीज में भ्रम पैदा करती है।',
+    kn: 'ಪೂರ್ವಾಪೇಕ್ಷಿತ ಪರಿಕಲ್ಪನೆ ಇಲ್ಲದಿರುವುದರಿಂದ ನಂತರದ ಎಲ್ಲದರಲ್ಲೂ ಗೊಂದಲ ಉಂಟಾಗುತ್ತದೆ.',
+  },
+};
+
+// Maps UI lang code → API language string
+const LANG_TO_API = { en: 'english', hi: 'hindi', kn: 'kannada' };
+const API_TO_LANG = { english: 'en', hindi: 'hi', kannada: 'kn' };
+
+// ── i18n core ─────────────────────────────────
+let currentLang = localStorage.getItem('ark_lang') || 'en';
+
+function T(key) { return (STRINGS[currentLang] || {})[key] || (STRINGS.en || {})[key] || key; }
+
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('ark_lang', lang);
+  // Update all data-i18n elements
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key  = el.dataset.i18n;
+    const attr = el.dataset.i18nAttr;
+    const val  = T(key);
+    if (attr) el.setAttribute(attr, val);
+    else      el.textContent = val;
+  });
+  // Sync lang picker buttons
+  document.querySelectorAll('.lang-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.lang === lang);
+  });
+  // Sync sel-lang dropdown
+  const sel = document.getElementById('sel-lang');
+  if (sel) sel.value = LANG_TO_API[lang] || 'english';
+  // Reload active lang-sensitive tabs
+  if (!document.getElementById('tab-notes').hidden) loadNotes();
+  if (!document.getElementById('tab-quiz').hidden)  loadQuiz();
+}
+
+function onLangSelectChange(val) {
+  // Dropdown changed → sync header lang picker
+  const lang = API_TO_LANG[val] || 'en';
+  currentLang = lang;
+  localStorage.setItem('ark_lang', lang);
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+}
+
+// ══════════════════════════════════════════════
 // STATE
 // ══════════════════════════════════════════════
 const SERVER   = window.location.origin;
-let student    = null;   // {id, name}
-let lastResult = null;   // last /analyse response
-let progChart  = null;   // Chart.js instance
-let selImage   = null;   // selected File for image chat
+let student    = null;
+let lastResult = null;
+let progChart  = null;
+let selImage   = null;
 
 const FP_COLOR = {
   GHOST:    '#f59e0b',
@@ -691,31 +890,25 @@ const FP_COLOR = {
   FRAGMENT: '#10b981',
   ORPHAN:   '#8b5cf6',
 };
-const FP_DESC = {
-  GHOST:    'You hold a strong but completely wrong belief — you are confident but the core idea is incorrect.',
-  INVERT:   'You have cause and effect reversed — the parts are right but the direction is wrong.',
-  HOLLOW:   'You use the right keywords but cannot explain the mechanism — it sounds right but means nothing.',
-  FRAGMENT: 'You understand part of the chain correctly but one key link is missing.',
-  ORPHAN:   'A prerequisite concept is missing, which causes confusion about everything that follows.',
-};
 
 // ══════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════
 document.getElementById('srv-label').textContent = SERVER;
 
-// Auto-login from face recognition URL params (?auto_id=S01&auto_name=John+Doe)
+// Apply saved language on load
+setLang(currentLang);
+
+// Auto-login from face recognition URL params
 const _urlParams = new URLSearchParams(window.location.search);
 const _autoId    = _urlParams.get('auto_id');
 const _autoName  = _urlParams.get('auto_name');
 if (_autoName) {
   const _decodedName = decodeURIComponent(_autoName.replace(/\+/g, ' '));
   if (_autoId) {
-    // Full auto-login: both name and ARK ID known
     student = { id: _autoId, name: _decodedName };
     localStorage.setItem('ark_student', JSON.stringify(student));
   } else {
-    // Name known but no ARK ID — pre-fill login form
     document.getElementById('inp-name').value = _decodedName;
     document.getElementById('inp-id').focus();
   }
@@ -723,15 +916,10 @@ if (_autoName) {
 }
 
 const savedStudent = localStorage.getItem('ark_student');
-if (savedStudent) {
-  student = JSON.parse(savedStudent);
-  showApp();
-}
+if (savedStudent) { student = JSON.parse(savedStudent); showApp(); }
 
 const savedResult = localStorage.getItem('ark_last_result');
-if (savedResult) {
-  lastResult = JSON.parse(savedResult);
-}
+if (savedResult) { lastResult = JSON.parse(savedResult); }
 
 // ══════════════════════════════════════════════
 // AUTH
@@ -746,11 +934,10 @@ function doLogin() {
 }
 
 function doLogout() {
-  if (!confirm('Sign out? Your progress is saved on the server.')) return;
+  if (!confirm(T('signout_confirm'))) return;
   localStorage.removeItem('ark_student');
   localStorage.removeItem('ark_last_result');
-  student    = null;
-  lastResult = null;
+  student = null; lastResult = null;
   document.getElementById('screen-login').hidden = false;
   document.getElementById('screen-app').hidden   = true;
 }
@@ -760,11 +947,8 @@ function showApp() {
   document.getElementById('screen-app').hidden   = false;
   document.getElementById('hdr-name').textContent = student.name;
   document.getElementById('hdr-id').textContent   = student.id;
-  if (lastResult) {
-    renderResult(lastResult);
-  } else {
-    fetchServerResult();
-  }
+  if (lastResult) renderResult(lastResult);
+  else fetchServerResult();
   loadHistory();
   loadPoints();
   loadTeacherPresence();
@@ -778,13 +962,10 @@ async function loadTeacherPresence() {
     const teachers = d.teachers || [];
     const banner   = document.getElementById('teacher-presence-banner');
     if (!banner) return;
-    if (teachers.length === 0) {
-      banner.style.display = 'none';
-      return;
-    }
+    if (!teachers.length) { banner.style.display = 'none'; return; }
     const names = teachers.map(t => t.person_name).join(', ');
     banner.style.display = 'block';
-    banner.innerHTML = `<span style="font-size:1.1rem">&#x1F4DA;</span> <strong>${names}</strong> is present today`;
+    banner.innerHTML = `<span style="font-size:1.1rem">&#x1F4DA;</span> <strong>${names}</strong> ${T('teacher_present')}`;
   } catch(e) {}
 }
 
@@ -798,10 +979,9 @@ async function fetchServerResult() {
       localStorage.setItem('ark_last_result', JSON.stringify(data));
       renderResult(data);
     }
-  } catch (_) { /* server offline */ }
+  } catch (_) {}
 }
 
-// Enter key on login inputs
 document.getElementById('inp-name').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 
 // ══════════════════════════════════════════════
@@ -822,14 +1002,12 @@ function switchTab(name, btn) {
 // ══════════════════════════════════════════════
 async function submitAnswer() {
   const topic  = document.getElementById('sel-topic').value;
-  const lang   = document.getElementById('sel-lang').value;
   const answer = document.getElementById('inp-answer').value.trim();
-
   if (!answer) { alert('Please write your explanation before submitting.'); return; }
 
   const btn = document.getElementById('btn-submit');
-  btn.textContent = 'Analysing… please wait';
-  btn.disabled = true;
+  btn.textContent = T('analysing');
+  btn.disabled    = true;
 
   try {
     const res = await fetch(SERVER + '/analyse', {
@@ -840,27 +1018,24 @@ async function submitAnswer() {
         student_name: student.name,
         topic,
         answer_text:  answer,
-        language:     lang,
+        language:     LANG_TO_API[currentLang],
       }),
     });
-
     if (!res.ok) throw new Error(`Server error ${res.status}`);
     const data = await res.json();
     lastResult = data;
     localStorage.setItem('ark_last_result', JSON.stringify(data));
     renderResult(data);
-
     // Jump to result tab
     document.querySelectorAll('.tab-panel').forEach(p => p.hidden = true);
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     document.getElementById('tab-result').hidden = false;
-    document.querySelectorAll('.nav-btn')[1].classList.add('active');
-
+    document.querySelectorAll('.nav-btn')[3].classList.add('active');
   } catch (e) {
     alert('Could not reach the backend.\n\nMake sure the server is running at:\n' + SERVER);
   } finally {
-    btn.textContent = 'Analyse My Answer →';
-    btn.disabled = false;
+    btn.textContent = T('submit_btn');
+    btn.disabled    = false;
   }
 }
 
@@ -868,43 +1043,34 @@ async function submitAnswer() {
 // RENDER RESULT
 // ══════════════════════════════════════════════
 function renderResult(data) {
-  document.getElementById('result-empty').hidden    = true;
-  document.getElementById('result-content').hidden  = false;
+  document.getElementById('result-empty').hidden   = true;
+  document.getElementById('result-content').hidden = false;
 
   const fp    = data.fingerprint || 'FRAGMENT';
   const color = FP_COLOR[fp] || '#8892a4';
 
-  // Fingerprint banner
   const banner = document.getElementById('fp-banner');
   banner.style.borderColor = color;
   banner.style.color       = color;
   document.getElementById('fp-type').textContent = fp;
-  document.getElementById('fp-desc').textContent = FP_DESC[fp] || '';
+  document.getElementById('fp-desc').textContent = (FP_DESC[fp] || {})[currentLang] || (FP_DESC[fp] || {}).en || '';
 
-  // Drift
   const drift = Math.round((data.drift_score || 0) * 100);
   document.getElementById('drift-fill').style.width = drift + '%';
   document.getElementById('drift-pct').textContent  = drift + '%';
   document.getElementById('drift-pct').style.color  = drift > 70 ? '#ef4444' : drift > 45 ? '#f59e0b' : '#10b981';
 
-  // Nodes
   const grid      = document.getElementById('node-grid');
   grid.innerHTML  = '';
-  const activated = data.activated_nodes || [];
-  const skipped   = data.skipped_nodes   || [];
-  const wrong     = data.wrong_claims    || [];
+  (data.activated_nodes || []).forEach(n => grid.appendChild(makeChip(n, 'activated', '✓')));
+  (data.skipped_nodes   || []).forEach(n => grid.appendChild(makeChip(n, 'skipped',   '✗')));
+  (data.wrong_claims    || []).forEach(n => grid.appendChild(makeChip(n, 'wrong',     '⚠')));
 
-  activated.forEach(n => grid.appendChild(makeChip(n, 'activated', '✓')));
-  skipped.forEach(n   => grid.appendChild(makeChip(n, 'skipped',   '✗')));
-  wrong.forEach(n     => grid.appendChild(makeChip(n, 'wrong',     '⚠')));
-
-  // Text — handle both top-level (/analyse response) and nested (seeded MongoDB format)
   const rem = data.remediation || {};
   document.getElementById('res-wrong').textContent    = data.what_is_wrong     || rem.what_is_wrong     || '—';
   document.getElementById('res-story').textContent    = data.story_fix          || rem.story_fix          || '—';
   document.getElementById('res-followup').textContent = data.follow_up_question || rem.follow_up_question || '—';
 
-  // Load classmates for the same topic
   if (data.topic) loadClassmates(data.topic, data.fingerprint);
 }
 
@@ -925,9 +1091,8 @@ async function loadHistory() {
     if (!res.ok) return;
     const data = await res.json();
     renderProgress(data.history || []);
-  } catch (_) { /* server offline */ }
+  } catch (_) {}
 
-  // Also load skipped nodes from last result for gap analysis card
   if (lastResult) {
     const skipped = lastResult.skipped_nodes || [];
     if (skipped.length) {
@@ -952,33 +1117,27 @@ function renderProgress(history) {
   empty.hidden   = true;
   content.hidden = false;
 
-  // Stats row
-  const latest    = history[history.length - 1];
-  const fpCounts  = {};
+  const latest   = history[history.length - 1];
+  const fpCounts = {};
   history.forEach(h => { fpCounts[h.fingerprint] = (fpCounts[h.fingerprint] || 0) + 1; });
-  const dominant  = Object.entries(fpCounts).sort((a, b) => b[1] - a[1])[0][0];
-  const avgDrift  = (history.reduce((s, h) => s + h.drift_score, 0) / history.length * 100).toFixed(0);
+  const avgDrift = (history.reduce((s, h) => s + h.drift_score, 0) / history.length * 100).toFixed(0);
 
   document.getElementById('stats-row').innerHTML = `
     <div class="stat-card">
       <div class="stat-val">${history.length}</div>
-      <div class="stat-lbl">Submissions</div>
+      <div class="stat-lbl">${T('prog_submissions')}</div>
     </div>
     <div class="stat-card">
       <div class="stat-val" style="color:${FP_COLOR[latest.fingerprint]}">${latest.fingerprint}</div>
-      <div class="stat-lbl">Latest Type</div>
+      <div class="stat-lbl">${T('prog_latest')}</div>
     </div>
     <div class="stat-card">
       <div class="stat-val">${avgDrift}%</div>
-      <div class="stat-lbl">Avg Drift</div>
+      <div class="stat-lbl">${T('prog_avg_drift')}</div>
     </div>
   `;
 
-  // Chart
-  const labels = history.map(h => {
-    const d = new Date(h.timestamp);
-    return (d.getMonth() + 1) + '/' + d.getDate();
-  });
+  const labels = history.map(h => { const d = new Date(h.timestamp); return (d.getMonth()+1)+'/'+d.getDate(); });
   const vals   = history.map(h => +(h.drift_score * 100).toFixed(1));
   const ptClrs = history.map(h => FP_COLOR[h.fingerprint] || '#8892a4');
 
@@ -988,42 +1147,28 @@ function renderProgress(history) {
     data: {
       labels,
       datasets: [{
-        label: 'Drift %',
-        data:  vals,
-        borderColor: '#e94560',
+        label: 'Drift %', data: vals, borderColor: '#e94560',
         backgroundColor: 'rgba(233,69,96,.12)',
-        pointBackgroundColor: ptClrs,
-        pointBorderColor: ptClrs,
-        pointRadius: 7,
-        pointHoverRadius: 9,
-        tension: 0.35,
-        fill: true,
+        pointBackgroundColor: ptClrs, pointBorderColor: ptClrs,
+        pointRadius: 7, pointHoverRadius: 9, tension: 0.35, fill: true,
       }],
     },
     options: {
       responsive: true,
       plugins: { legend: { display: false } },
       scales: {
-        y: {
-          min: 0, max: 100,
-          ticks: { color: '#8892a4', callback: v => v + '%' },
-          grid:  { color: 'rgba(136,146,164,.15)' },
-        },
-        x: {
-          ticks: { color: '#8892a4' },
-          grid:  { color: 'rgba(136,146,164,.15)' },
-        },
+        y: { min: 0, max: 100, ticks: { color: '#8892a4', callback: v => v+'%' }, grid: { color: 'rgba(136,146,164,.15)' } },
+        x: { ticks: { color: '#8892a4' }, grid: { color: 'rgba(136,146,164,.15)' } },
       },
     },
   });
 
-  // History table
   const rows = history.slice().reverse().map(h => {
-    const d    = new Date(h.timestamp);
-    const date = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
-    const col  = FP_COLOR[h.fingerprint] || '#8892a4';
+    const d   = new Date(h.timestamp);
+    const dt  = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+    const col = FP_COLOR[h.fingerprint] || '#8892a4';
     return `<tr>
-      <td>${date}</td>
+      <td>${dt}</td>
       <td style="text-transform:capitalize">${h.topic.replace(/_/g,' ')}</td>
       <td><span class="pill" style="color:${col};border:1px solid ${col};background:${col}22">${h.fingerprint}</span></td>
       <td>${(h.drift_score*100).toFixed(0)}%</td>
@@ -1032,60 +1177,128 @@ function renderProgress(history) {
 
   document.getElementById('hist-table-wrap').innerHTML = `
     <table class="hist-table">
-      <thead><tr><th>Date</th><th>Topic</th><th>Type</th><th>Drift</th></tr></thead>
+      <thead><tr><th>${T('hist_date')}</th><th>${T('hist_topic')}</th><th>${T('hist_type')}</th><th>${T('hist_drift')}</th></tr></thead>
       <tbody>${rows}</tbody>
-    </table>
-  `;
+    </table>`;
 }
 
 // ══════════════════════════════════════════════
-// NOTES
+// NOTES — auto-generates in student's language
 // ══════════════════════════════════════════════
 async function loadNotes(topic) {
   topic = topic || document.getElementById('notes-topic-sel').value;
+  const lang    = LANG_TO_API[currentLang];
   const empty   = document.getElementById('notes-empty');
   const loading = document.getElementById('notes-loading');
   const box     = document.getElementById('notes-box');
-  empty.hidden = box.hidden = true; loading.hidden = false;
+  const emptyMsg   = document.getElementById('notes-empty-msg');
+  const loadingMsg = document.getElementById('notes-loading-msg');
+
+  empty.hidden = box.hidden = true;
+  loading.hidden = false;
+  loadingMsg.textContent = T('notes_generating');
+
   try {
-    const res = await fetch(`${SERVER}/api/content/notes/${topic}`);
+    // Try fetching existing notes in selected language
+    const res = await fetch(`${SERVER}/api/content/notes/${topic}?lang=${lang}`);
     const d   = await res.json();
-    loading.hidden = true;
+
     if (d.notes) {
+      loading.hidden = true;
       box.hidden = false;
       document.getElementById('notes-topic-disp').textContent = topic.replace(/_/g,' ');
       document.getElementById('notes-body').textContent       = d.notes;
-      document.getElementById('notes-date').textContent       = 'Generated: ' + new Date(d.generated_at).toLocaleString();
+      document.getElementById('notes-date').textContent       = T('generated_at') + new Date(d.generated_at).toLocaleString();
     } else {
-      empty.hidden = false;
+      // Auto-generate in selected language
+      try {
+        const gr = await fetch(`${SERVER}/api/content/generate-notes`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ topic, language: lang }),
+        });
+        if (!gr.ok) throw new Error('generate failed');
+        const gd = await gr.json();
+        loading.hidden = true;
+        box.hidden = false;
+        document.getElementById('notes-topic-disp').textContent = topic.replace(/_/g,' ');
+        document.getElementById('notes-body').textContent       = gd.notes;
+        document.getElementById('notes-date').textContent       = T('generated_at') + new Date(gd.generated_at).toLocaleString();
+      } catch (_) {
+        loading.hidden = true;
+        empty.hidden   = false;
+        emptyMsg.textContent = T('notes_ask_teacher');
+      }
     }
-  } catch (_) { loading.hidden = true; empty.hidden = false; }
+  } catch (_) {
+    loading.hidden = true;
+    empty.hidden   = false;
+    emptyMsg.textContent = T('notes_ask_teacher');
+  }
 }
 
 // ══════════════════════════════════════════════
-// QUIZ
+// QUIZ — auto-generates in student's language
 // ══════════════════════════════════════════════
-let quizData    = null;  // loaded questions
-let quizAnswers = {};    // {qi: chosen_option_index}
+let quizData    = null;
+let quizAnswers = {};
 
 async function loadQuiz(topic) {
   topic = topic || document.getElementById('quiz-topic-sel').value;
+  const lang    = LANG_TO_API[currentLang];
   const empty   = document.getElementById('quiz-empty');
   const loading = document.getElementById('quiz-loading');
   const active  = document.getElementById('quiz-active');
   const done    = document.getElementById('quiz-done');
-  empty.hidden = active.hidden = done.hidden = true; loading.hidden = false;
+  const emptyMsg   = document.getElementById('quiz-empty-msg');
+  const loadingMsg = document.getElementById('quiz-loading-msg');
+
+  empty.hidden = active.hidden = done.hidden = true;
+  loading.hidden = false;
+  loadingMsg.textContent = T('quiz_generating');
   quizData = null; quizAnswers = {};
+
   try {
-    const res = await fetch(`${SERVER}/api/content/quiz/${topic}`);
+    const res = await fetch(`${SERVER}/api/content/quiz/${topic}?lang=${lang}`);
     const d   = await res.json();
+    const qs  = d.questions || [];
+
+    if (qs.length) {
+      loading.hidden = true;
+      quizData = d;
+      active.hidden = false;
+      renderQuizQuestions(qs);
+    } else {
+      // Auto-generate in selected language
+      try {
+        const gr = await fetch(`${SERVER}/api/content/generate-quiz`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ topic, language: lang }),
+        });
+        if (!gr.ok) throw new Error('generate failed');
+        const gd = await gr.json();
+        const gqs = gd.questions || [];
+        loading.hidden = true;
+        if (gqs.length) {
+          quizData = gd;
+          active.hidden = false;
+          renderQuizQuestions(gqs);
+        } else {
+          empty.hidden = false;
+          emptyMsg.textContent = T('quiz_ask_teacher');
+        }
+      } catch (_) {
+        loading.hidden = true;
+        empty.hidden   = false;
+        emptyMsg.textContent = T('quiz_ask_teacher');
+      }
+    }
+  } catch (_) {
     loading.hidden = true;
-    const qs = d.questions || [];
-    if (!qs.length) { empty.hidden = false; return; }
-    quizData = d;
-    active.hidden = false;
-    renderQuizQuestions(qs);
-  } catch (_) { loading.hidden = true; empty.hidden = false; }
+    empty.hidden   = false;
+    emptyMsg.textContent = T('quiz_ask_teacher');
+  }
 }
 
 function renderQuizQuestions(qs) {
@@ -1094,8 +1307,7 @@ function renderQuizQuestions(qs) {
       <div class="quiz-q-label">Q${i+1}. ${q.question}</div>
       <div class="quiz-opts">
         ${q.options.map((opt, j) => `
-          <button class="quiz-opt-btn" id="qo-${i}-${j}"
-            onclick="selectQuizOpt(${i}, ${j})">
+          <button class="quiz-opt-btn" id="qo-${i}-${j}" onclick="selectQuizOpt(${i}, ${j})">
             ${'ABCD'[j]}. ${opt}
           </button>`).join('')}
       </div>
@@ -1103,11 +1315,7 @@ function renderQuizQuestions(qs) {
 }
 
 function selectQuizOpt(qi, oi) {
-  // Deselect previous
-  for (let j = 0; j < 4; j++) {
-    const b = document.getElementById(`qo-${qi}-${j}`);
-    if (b) b.classList.remove('sel');
-  }
+  for (let j = 0; j < 4; j++) { const b = document.getElementById(`qo-${qi}-${j}`); if (b) b.classList.remove('sel'); }
   const chosen = document.getElementById(`qo-${qi}-${oi}`);
   if (chosen) chosen.classList.add('sel');
   quizAnswers[qi] = oi;
@@ -1115,34 +1323,29 @@ function selectQuizOpt(qi, oi) {
 
 async function submitQuiz() {
   if (!quizData) return;
-  const qs   = quizData.questions || [];
-  const ans  = qs.map((_, i) => quizAnswers[i] ?? -1);
+  const qs  = quizData.questions || [];
+  const ans = qs.map((_, i) => quizAnswers[i] ?? -1);
   const unanswered = ans.filter(a => a === -1).length;
-  if (unanswered > 0 && !confirm(`You have ${unanswered} unanswered question(s). Submit anyway?`)) return;
+  if (unanswered > 0 && !confirm(T('unanswered').replace('{n}', unanswered))) return;
 
   const topic = document.getElementById('quiz-topic-sel').value;
-  document.getElementById('quiz-submit-btn').textContent = 'Submitting...';
-  document.getElementById('quiz-submit-btn').disabled    = true;
+  const btn   = document.getElementById('quiz-submit-btn');
+  btn.textContent = T('quiz_submitting');
+  btn.disabled    = true;
   try {
     const res = await fetch(`${SERVER}/api/quiz/submit`, {
-      method: 'POST', headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        student_id:   student.id,
-        student_name: student.name,
-        topic,
-        answers: ans,
-      })
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ student_id: student.id, student_name: student.name, topic, answers: ans }),
     });
     const result = await res.json();
     if (result.error) throw new Error(result.error);
     showQuizResult(result);
-    // Refresh points
     loadPoints();
   } catch (e) {
     alert('Submit failed: ' + e.message);
   } finally {
-    document.getElementById('quiz-submit-btn').textContent = 'Submit Quiz →';
-    document.getElementById('quiz-submit-btn').disabled    = false;
+    btn.textContent = T('quiz_submit_btn');
+    btn.disabled    = false;
   }
 }
 
@@ -1150,7 +1353,7 @@ function showQuizResult(result) {
   document.getElementById('quiz-active').hidden = true;
   document.getElementById('quiz-done').hidden   = false;
   document.getElementById('score-fraction').textContent = `${result.num_correct}/${result.total}`;
-  document.getElementById('score-pts').textContent      = `+${result.points_earned} points earned!`;
+  document.getElementById('score-pts').textContent      = `+${result.points_earned} ${T('pts_suffix')}`;
 
   const qs = result.questions || [];
   document.getElementById('quiz-review').innerHTML = qs.map((q, i) => {
@@ -1164,7 +1367,7 @@ function showQuizResult(result) {
             ${'ABCD'[j]}. ${opt}
           </button>`).join('')}
       </div>
-      ${q.explanation ? `<div class="quiz-expl">Explanation: ${q.explanation}</div>` : ''}
+      ${q.explanation ? `<div class="quiz-expl">${T('explanation_lbl')}${q.explanation}</div>` : ''}
     </div>`;
   }).join('');
 }
@@ -1197,12 +1400,10 @@ async function loadPoints() {
 function renderPoints(pts, rewards, lb) {
   document.getElementById('pts-big').textContent = pts;
 
-  // Reward track progress bar (0-100% up to the next milestone)
   const maxPts  = rewards.length ? rewards[rewards.length - 1].points : 1000;
   const fillPct = Math.min(100, Math.round(pts / maxPts * 100));
   document.getElementById('reward-fill').style.width = fillPct + '%';
 
-  // Reward milestones
   document.getElementById('reward-milestones').innerHTML = rewards.map(r => {
     const unlocked = pts >= r.points;
     return `<div class="reward-row ${unlocked ? 'unlocked' : ''}" style="${unlocked ? `color:${r.color}` : ''}">
@@ -1215,21 +1416,19 @@ function renderPoints(pts, rewards, lb) {
     </div>`;
   }).join('');
 
-  // Leaderboard
-  const myRank = lb.findIndex(r => r.student_id === student.id);
   document.getElementById('leaderboard-list').innerHTML = lb.length ? lb.map((r, i) => {
-    const isMe = r.student_id === student.id;
+    const isMe  = r.student_id === student.id;
     const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i+1}.`;
     return `<div class="lb-row ${isMe ? 'lb-you' : ''}">
       <span class="lb-rank">${medal}</span>
       <span class="lb-name">${r.student_name}${isMe ? ' (You)' : ''}</span>
       <span class="lb-pts">${r.points || 0} pts</span>
     </div>`;
-  }).join('') : '<p style="color:var(--muted);font-size:.85rem">No leaderboard data yet.</p>';
+  }).join('') : `<p style="color:var(--muted);font-size:.85rem">${T('lb_empty')}</p>`;
 }
 
 // ══════════════════════════════════════════════
-// CLASSMATES (Ask a Classmate)
+// CLASSMATES
 // ══════════════════════════════════════════════
 async function loadClassmates(topic, myFingerprint) {
   try {
@@ -1253,17 +1452,15 @@ async function loadClassmates(topic, myFingerprint) {
         <div class="classmate-name">${p.student_name}</div>
         <div class="classmate-meta">${(p.topic || '').replace(/_/g,' ')}${diff}</div>
         <span class="classmate-fp" style="color:${col};border-color:${col};background:${col}18">${p.fingerprint}</span>
-        <span class="classmate-drift">drift ${Math.round((p.drift_score||0)*100)}%</span>
-      `;
+        <span class="classmate-drift">drift ${Math.round((p.drift_score||0)*100)}%</span>`;
       card.onclick = () => showClassmateDetail(p);
       grid.appendChild(card);
     });
-  } catch (_) { /* server offline */ }
+  } catch (_) {}
 }
 
 function showClassmateDetail(peer) {
-  const col = FP_COLOR[peer.fingerprint] || '#8892a4';
-  const rem = peer.remediation || {};
+  const rem   = peer.remediation || {};
   const wrong = peer.what_is_wrong || rem.what_is_wrong || '';
   alert(
     `${peer.student_name} — ${peer.fingerprint}\n\n` +
@@ -1274,8 +1471,13 @@ function showClassmateDetail(peer) {
 }
 
 // ══════════════════════════════════════════════
-// IMAGE CHAT
+// IMAGE CHAT — sends language instruction
 // ══════════════════════════════════════════════
+const CHAT_LANG_INSTRUCTION = {
+  hi: 'कृपया हिंदी में उत्तर दें। ',
+  kn: 'ದಯವಿಟ್ಟು ಕನ್ನಡದಲ್ಲಿ ಉತ್ತರಿಸಿ। ',
+};
+
 function handleImage(e) {
   const file = e.target.files[0];
   if (!file) return;
@@ -1292,11 +1494,9 @@ function clearImage() {
 }
 
 function addMsg(text, role) {
-  const box = document.getElementById('chat-messages');
-  // Remove hint on first real message
+  const box  = document.getElementById('chat-messages');
   const hint = box.querySelector('.chat-hint');
   if (hint) hint.remove();
-
   const div = document.createElement('div');
   div.className   = 'chat-msg ' + role;
   div.textContent = text;
@@ -1313,15 +1513,17 @@ async function sendChat() {
 
   document.getElementById('chat-inp').value = '';
   addMsg(q, 'user');
-  addMsg('Thinking…', 'assistant loading');
+  addMsg('…', 'assistant loading');
+
+  const langPrefix = CHAT_LANG_INSTRUCTION[currentLang] || '';
+  const question   = langPrefix + q;
 
   let res;
   try {
     const fd = new FormData();
-    if (selImage) fd.append('image', selImage);
-    fd.append('question',   q);
+    fd.append('image',      selImage);
+    fd.append('question',   question);
     fd.append('student_id', student.id);
-
     res = await fetch(SERVER + '/api/image-chat', { method: 'POST', body: fd });
   } catch (netErr) {
     document.getElementById('loading-msg')?.remove();
@@ -1330,21 +1532,14 @@ async function sendChat() {
   }
 
   document.getElementById('loading-msg')?.remove();
-
   let data = {};
-  try { data = await res.json(); } catch (_) { data = {}; }
+  try { data = await res.json(); } catch (_) {}
 
-  if (data.answer) {
-    addMsg(data.answer, 'assistant');
-  } else {
-    const errText = data.error || data.detail || `Server error ${res.status}`;
-    addMsg(errText, 'system');
-  }
+  if (data.answer)  addMsg(data.answer, 'assistant');
+  else              addMsg(data.error || data.detail || `Server error ${res.status}`, 'system');
 }
 
-document.getElementById('chat-inp').addEventListener('keydown', e => {
-  if (e.key === 'Enter') sendChat();
-});
+document.getElementById('chat-inp').addEventListener('keydown', e => { if (e.key === 'Enter') sendChat(); });
 </script>
 </body>
 </html>
