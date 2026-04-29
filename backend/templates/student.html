@@ -295,6 +295,97 @@
 </head>
 <body>
 
+<!-- ══════════════ FACE VERIFICATION GATE ══════════════ -->
+<div id="face-gate" style="position:fixed;inset:0;z-index:9999;background:#0a0a14;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;font-family:'Inter',sans-serif">
+  <div style="font-size:30px;font-weight:900;color:#6366f1;letter-spacing:5px">ARK</div>
+  <div style="font-size:12px;color:#64748b;margin-top:-10px">Student Portal — Identity Verification</div>
+  <div style="position:relative;border-radius:16px;overflow:hidden;border:2px solid #1e293b;background:#000">
+    <video id="sgate-video" width="400" height="300" autoplay muted playsinline style="display:block"></video>
+    <canvas id="sgate-canvas" width="400" height="300" style="display:none"></canvas>
+    <div id="sgate-box" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none">
+      <div style="width:160px;height:160px;border:2px solid #6366f155;border-radius:12px"></div>
+    </div>
+  </div>
+  <div id="sgate-status" style="font-size:13px;color:#94a3b8">Initializing camera…</div>
+  <div id="sgate-error"  style="font-size:12px;color:#ef4444;display:none;max-width:360px;text-align:center"></div>
+  <div style="font-size:11px;color:#374151;margin-top:8px">
+    Not you? <span id="sgate-manual-btn" style="color:#6366f1;cursor:pointer;text-decoration:underline" onclick="skipGate()">Enter ID manually</span>
+  </div>
+</div>
+
+<script>
+(function () {
+  // Skip gate if coming from face recognition redirect
+  const _p = new URLSearchParams(window.location.search);
+  if (_p.get('auto_name')) {
+    document.getElementById('face-gate').remove();
+    return;
+  }
+
+  const gate   = document.getElementById('face-gate');
+  const video  = document.getElementById('sgate-video');
+  const canvas = document.getElementById('sgate-canvas');
+  const status = document.getElementById('sgate-status');
+  const errEl  = document.getElementById('sgate-error');
+  const box    = document.getElementById('sgate-box').firstElementChild;
+  let scanning = false, granted = false, interval;
+
+  window.skipGate = function () { gate.remove(); granted = true; clearInterval(interval); };
+
+  function setStatus(txt, color) { status.textContent = txt; status.style.color = color || '#94a3b8'; }
+  function setBox(color) { box.style.borderColor = color || '#6366f155'; box.style.boxShadow = color ? `0 0 18px ${color}55` : 'none'; }
+
+  navigator.mediaDevices.getUserMedia({ video: { width: 400, height: 300, facingMode: 'user' } })
+    .then(stream => {
+      video.srcObject = stream;
+      setStatus('Look at the camera to verify your identity');
+      interval = setInterval(scan, 2500);
+    })
+    .catch(() => {
+      setStatus('Camera unavailable — enter ID manually', '#f59e0b');
+      setTimeout(() => gate.remove(), 2000);
+    });
+
+  async function scan() {
+    if (scanning || granted) return;
+    scanning = true;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, 400, 300);
+    canvas.toBlob(async blob => {
+      try {
+        const fd = new FormData();
+        fd.append('image', blob, 'frame.jpg');
+        const r = await fetch('/api/identify', { method: 'POST', body: fd });
+        const d = await r.json();
+
+        if (d.access_granted) {
+          if (d.role === 'student') {
+            granted = true; clearInterval(interval);
+            setStatus(`Welcome, ${d.name}!`, '#10b981'); setBox('#10b981');
+            // Auto-login: populate and submit via URL redirect
+            const name = encodeURIComponent(d.name);
+            const id   = d.ark_id || '';
+            setTimeout(() => { window.location.href = `/student?auto_id=${id}&auto_name=${name}`; }, 800);
+          } else if (d.role === 'teacher') {
+            granted = true; clearInterval(interval);
+            setStatus(`Hello ${d.name}! Opening Teacher Dashboard…`, '#6366f1'); setBox('#6366f1');
+            setTimeout(() => { window.location.href = '/dashboard'; }, 1000);
+          }
+        } else if (d.reason === 'no_face') {
+          setBox(null); setStatus('No face detected — please look at the camera');
+        } else {
+          setBox('#ef4444'); setStatus('Not recognised — try manual login', '#ef4444');
+          errEl.textContent = 'Face not found in system. Use manual ID entry.';
+          errEl.style.display = 'block';
+          setTimeout(() => { errEl.style.display = 'none'; setBox(null); gate.remove(); }, 3000);
+        }
+      } catch (e) { setStatus('Scan error — retrying…'); }
+      scanning = false;
+    }, 'image/jpeg', 0.85);
+  }
+})();
+</script>
+
 <!-- ══════════════ LOGIN SCREEN ══════════════ -->
 <div id="screen-login" class="screen">
   <div class="login-box">
@@ -320,6 +411,7 @@
     </div>
     <button class="logout-btn" onclick="doLogout()">Sign out</button>
   </header>
+  <div id="teacher-presence-banner" style="display:none;background:#0f3460;color:#93c5fd;font-size:0.8rem;padding:6px 16px;text-align:center;flex-shrink:0"></div>
 
   <main>
 
@@ -612,6 +704,24 @@ const FP_DESC = {
 // ══════════════════════════════════════════════
 document.getElementById('srv-label').textContent = SERVER;
 
+// Auto-login from face recognition URL params (?auto_id=S01&auto_name=John+Doe)
+const _urlParams = new URLSearchParams(window.location.search);
+const _autoId    = _urlParams.get('auto_id');
+const _autoName  = _urlParams.get('auto_name');
+if (_autoName) {
+  const _decodedName = decodeURIComponent(_autoName.replace(/\+/g, ' '));
+  if (_autoId) {
+    // Full auto-login: both name and ARK ID known
+    student = { id: _autoId, name: _decodedName };
+    localStorage.setItem('ark_student', JSON.stringify(student));
+  } else {
+    // Name known but no ARK ID — pre-fill login form
+    document.getElementById('inp-name').value = _decodedName;
+    document.getElementById('inp-id').focus();
+  }
+  window.history.replaceState({}, '', window.location.pathname);
+}
+
 const savedStudent = localStorage.getItem('ark_student');
 if (savedStudent) {
   student = JSON.parse(savedStudent);
@@ -657,6 +767,25 @@ function showApp() {
   }
   loadHistory();
   loadPoints();
+  loadTeacherPresence();
+}
+
+async function loadTeacherPresence() {
+  try {
+    const r = await fetch(SERVER + '/api/attendance/teachers/today');
+    if (!r.ok) return;
+    const d = await r.json();
+    const teachers = d.teachers || [];
+    const banner   = document.getElementById('teacher-presence-banner');
+    if (!banner) return;
+    if (teachers.length === 0) {
+      banner.style.display = 'none';
+      return;
+    }
+    const names = teachers.map(t => t.person_name).join(', ');
+    banner.style.display = 'block';
+    banner.innerHTML = `<span style="font-size:1.1rem">&#x1F4DA;</span> <strong>${names}</strong> is present today`;
+  } catch(e) {}
 }
 
 async function fetchServerResult() {

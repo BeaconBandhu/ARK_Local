@@ -154,6 +154,114 @@ button.ctrl.primary{background:var(--indigo);border-color:var(--indigo);color:#f
 </head>
 <body>
 
+<!-- ══════════════ FACE VERIFICATION GATE ══════════════ -->
+<div id="face-gate" style="position:fixed;inset:0;z-index:9999;background:#0a0a14;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;font-family:'Inter',sans-serif">
+  <div style="font-size:32px;font-weight:900;color:#6366f1;letter-spacing:5px">ARK</div>
+  <div style="font-size:13px;color:#64748b;margin-top:-10px">Teacher Dashboard — Identity Verification</div>
+  <div style="position:relative;border-radius:16px;overflow:hidden;border:2px solid #1e293b;background:#000">
+    <video id="gate-video" width="480" height="360" autoplay muted playsinline style="display:block"></video>
+    <canvas id="gate-canvas" width="480" height="360" style="display:none"></canvas>
+    <div id="gate-box" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none">
+      <div style="width:180px;height:180px;border:2px solid #6366f155;border-radius:12px;box-shadow:0 0 0 1px #6366f122"></div>
+    </div>
+  </div>
+  <div id="gate-status" style="font-size:14px;color:#94a3b8">Initializing camera…</div>
+  <div id="gate-error"  style="font-size:12px;color:#ef4444;display:none;max-width:400px;text-align:center"></div>
+  <div id="gate-model-warn" style="font-size:11px;color:#f59e0b;display:none">⚠ No face model found — run annotation.py to enroll people first</div>
+</div>
+
+<script>
+(function () {
+  const gate   = document.getElementById('face-gate');
+  const video  = document.getElementById('gate-video');
+  const canvas = document.getElementById('gate-canvas');
+  const status = document.getElementById('gate-status');
+  const errEl  = document.getElementById('gate-error');
+  const warn   = document.getElementById('gate-model-warn');
+  const box    = document.getElementById('gate-box');
+  let scanning = false, granted = false, interval;
+
+  function setStatus(txt, color) {
+    status.textContent = txt;
+    status.style.color = color || '#94a3b8';
+  }
+
+  function setBox(color) {
+    box.firstElementChild.style.borderColor = color || '#6366f155';
+    box.firstElementChild.style.boxShadow   = color ? `0 0 20px ${color}66` : 'none';
+  }
+
+  // Check model first
+  fetch('/api/identify/model-status').then(r => r.json()).then(d => {
+    if (!d.loaded) warn.style.display = 'block';
+  }).catch(() => {});
+
+  navigator.mediaDevices.getUserMedia({ video: { width: 480, height: 360, facingMode: 'user' } })
+    .then(stream => {
+      video.srcObject = stream;
+      setStatus('Look at the camera to verify your identity');
+      interval = setInterval(scan, 2500);
+    })
+    .catch(err => {
+      setStatus('Camera access denied', '#ef4444');
+      errEl.textContent = 'Allow camera access and reload the page. ' + err.message;
+      errEl.style.display = 'block';
+    });
+
+  async function scan() {
+    if (scanning || granted) return;
+    scanning = true;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, 480, 360);
+    canvas.toBlob(async blob => {
+      try {
+        const fd = new FormData();
+        fd.append('image', blob, 'frame.jpg');
+        const r = await fetch('/api/identify', { method: 'POST', body: fd });
+        const d = await r.json();
+
+        if (d.error && d.error.includes('model')) { warn.style.display = 'block'; }
+
+        if (d.access_granted) {
+          if (d.role === 'teacher') {
+            granted = true;
+            clearInterval(interval);
+            setStatus(`Welcome, ${d.name}! Access granted.`, '#10b981');
+            setBox('#10b981');
+            gate.style.transition = 'opacity 0.7s';
+            gate.style.opacity = '0';
+            setTimeout(() => gate.remove(), 750);
+          } else {
+            // Student detected — redirect to their profile
+            setStatus(`Hello ${d.name}! Opening your student profile…`, '#f59e0b');
+            setBox('#f59e0b');
+            granted = true;
+            clearInterval(interval);
+            const name   = encodeURIComponent(d.name);
+            const params = d.ark_id
+              ? `auto_id=${d.ark_id}&auto_name=${name}`
+              : `auto_name=${name}`;
+            setTimeout(() => { window.location.href = `/student?${params}`; }, 1200);
+          }
+        } else if (d.reason === 'no_face') {
+          setBox(null);
+          setStatus('No face detected — please look at the camera');
+        } else {
+          setBox('#ef4444');
+          setStatus('Face not recognised — access denied', '#ef4444');
+          errEl.textContent = 'Unregistered person. Contact Aranya Bandhu (admin).';
+          errEl.style.display = 'block';
+          setTimeout(() => { errEl.style.display = 'none'; setBox(null); }, 3000);
+        }
+      } catch (e) {
+        setStatus('Scan error — retrying…');
+      }
+      scanning = false;
+    }, 'image/jpeg', 0.85);
+  }
+})();
+</script>
+
 <!-- SIDEBAR -->
 <aside class="sidebar">
   <div class="logo">ARK<span>Teacher Dashboard</span></div>
@@ -220,6 +328,23 @@ button.ctrl.primary{background:var(--indigo);border-color:var(--indigo);color:#f
 
     <!-- ═══ OVERVIEW TAB ═══ -->
     <div class="tab active" id="tab-overview">
+      <!-- Attendance Banner -->
+      <div class="card" id="attendance-banner" style="margin-bottom:16px;display:flex;align-items:center;gap:24px;padding:14px 20px;border-left:4px solid var(--green)">
+        <div>
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Today's Attendance</div>
+          <div style="font-size:28px;font-weight:800;color:var(--green)" id="att-student-count">—</div>
+          <div style="font-size:11px;color:var(--muted)">students present</div>
+        </div>
+        <div style="border-left:1px solid var(--border);padding-left:24px">
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Teachers In</div>
+          <div id="att-teachers" style="font-size:13px;color:var(--text)">—</div>
+        </div>
+        <div style="border-left:1px solid var(--border);padding-left:24px;flex:1">
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Present Students</div>
+          <div id="att-student-list" style="font-size:12px;color:var(--muted);display:flex;flex-wrap:wrap;gap:6px"></div>
+        </div>
+      </div>
+
       <div class="grid-4" id="metrics-row">
         <div class="metric-card" style="border-left-color:var(--indigo)">
           <div class="metric-val" id="m-answered" style="color:var(--indigo)">0/30</div>
@@ -352,7 +477,7 @@ button.ctrl.primary{background:var(--indigo);border-color:var(--indigo);color:#f
           </div>
           <div id="cl-gen-status" class="text-xs text-muted" style="margin-top:10px"></div>
           <div class="text-xs text-muted" style="margin-top:6px;line-height:1.6">
-            Students see Notes on the <strong>Notes</strong> tab and Quiz on the <strong>Quiz</strong> tab. Takes 30-60s per generation.
+            Students see Notes on the <strong>Notes</strong> tab and Quiz on the <strong>Quiz</strong> tab. Powered by OpenAI.
           </div>
         </div>
       </div>
@@ -595,6 +720,23 @@ function renderAll() {
   renderRecentFeed();
   renderStudentTable(allStudents);
 }
+
+async function loadAttendance() {
+  try {
+    const r = await fetch('/api/attendance/today');
+    if (!r.ok) return;
+    const d = await r.json();
+    document.getElementById('att-student-count').textContent = d.student_count ?? 0;
+    const teachers = (d.teachers || []).map(t => t.person_name).join(', ') || 'None yet';
+    document.getElementById('att-teachers').textContent = teachers;
+    const listEl = document.getElementById('att-student-list');
+    listEl.innerHTML = (d.students || []).map(s =>
+      `<span style="background:var(--faint);border-radius:6px;padding:2px 8px">${s.person_name}</span>`
+    ).join('') || '<span style="color:var(--muted)">No students checked in yet</span>';
+  } catch(e) {}
+}
+loadAttendance();
+setInterval(loadAttendance, 30000);
 
 function renderMetrics() {
   const n = allStudents.length;
@@ -1012,14 +1154,15 @@ async function clGenerateNotes() {
   const btn   = document.getElementById('btn-gen-notes');
   const st    = document.getElementById('cl-gen-status');
   btn.disabled = true; btn.textContent = 'Generating...';
-  st.textContent = 'Asking Ollama to write study notes... (30-60s)';
+  st.textContent = 'Asking OpenAI to write study notes...';
   try {
     const r = await fetch('/api/content/generate-notes', {
       method: 'POST', headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({topic})
     });
+    if (!r.ok) { const t = await r.text(); throw new Error(t.slice(0,120)); }
     const d = await r.json();
-    if (d.error) throw new Error(d.error);
+    if (d.error || d.detail) throw new Error(d.error || d.detail);
     document.getElementById('cl-notes-card').style.display = 'block';
     document.getElementById('cl-notes-topic').textContent  = topic.replace(/_/g,' ');
     document.getElementById('cl-notes-text').textContent   = d.notes || '—';
@@ -1038,14 +1181,15 @@ async function clGenerateQuiz() {
   const btn   = document.getElementById('btn-gen-quiz');
   const st    = document.getElementById('cl-gen-status');
   btn.disabled = true; btn.textContent = 'Generating...';
-  st.textContent = `Asking Ollama to create ${n} MCQ questions... (30-60s)`;
+  st.textContent = `Asking OpenAI to create ${n} MCQ questions...`;
   try {
     const r = await fetch('/api/content/generate-quiz', {
       method: 'POST', headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({topic, num_questions: n})
     });
+    if (!r.ok) { const t = await r.text(); throw new Error(t.slice(0,120)); }
     const d = await r.json();
-    if (d.error) throw new Error(d.error);
+    if (d.error || d.detail) throw new Error(d.error || d.detail);
     const qs = d.questions || [];
     document.getElementById('cl-quiz-card').style.display  = 'block';
     document.getElementById('cl-quiz-topic').textContent   = topic.replace(/_/g,' ');

@@ -65,8 +65,12 @@ app = FastAPI(title="ECHO ARK", version="1.0.0", lifespan=lifespan)
 
 from dashboard_routes import router as dashboard_router
 from content_routes import router as content_router
+from attendance_routes import router as attendance_router
+from identify_routes import router as identify_router
 app.include_router(dashboard_router)
 app.include_router(content_router)
+app.include_router(attendance_router)
+app.include_router(identify_router)
 
 CORS_ORIGINS = os.getenv("CORS_ORIGINS", "*").split(",")
 app.add_middleware(
@@ -277,8 +281,8 @@ async def voice_transcribe(audio: UploadFile = File(...), language: str = Form("
 async def obsidian_query(req: ChatRequest):
     if not obsidian_svc:
         raise HTTPException(503, "Obsidian service not ready")
-    if not await ollama.is_available():
-        raise HTTPException(503, "Ollama is not available")
+    if not os.getenv("OPENAI_API_KEY") and not await ollama.is_available():
+        raise HTTPException(503, "No AI backend available — set OPENAI_API_KEY or start Ollama")
     answer = await obsidian_svc.answer_query(req.query, image_path=req.image_path)
     return {"answer": answer}
 
@@ -297,12 +301,41 @@ async def image_chat(
     image:      UploadFile | None = File(None),
     student_id: str              = Form(""),
 ):
+    image_bytes = await image.read() if image else None
+
+    # ── OpenAI (primary) ──────────────────────────────────────────────────────
+    OPENAI_KEY = os.getenv("OPENAI_API_KEY", "")
+    if OPENAI_KEY:
+        try:
+            import base64 as _b64
+            import imghdr
+            from openai import AsyncOpenAI
+            client = AsyncOpenAI(api_key=OPENAI_KEY)
+            if image_bytes:
+                fmt = imghdr.what(None, image_bytes) or "jpeg"
+                media_map  = {"jpeg": "image/jpeg", "png": "image/png",
+                              "webp": "image/webp", "gif": "image/gif"}
+                media_type = media_map.get(fmt, "image/jpeg")
+                content = [
+                    {"type": "image_url", "image_url": {
+                        "url": f"data:{media_type};base64,{_b64.standard_b64encode(image_bytes).decode()}"}},
+                    {"type": "text", "text": question},
+                ]
+            else:
+                content = question
+            resp = await client.chat.completions.create(
+                model="gpt-4o-mini",
+                max_tokens=1024,
+                messages=[{"role": "user", "content": content}],
+            )
+            return JSONResponse({"answer": resp.choices[0].message.content})
+        except Exception as oai_err:
+            logger.warning("OpenAI failed (%s) — falling back to Ollama", oai_err)
+
+    # ── Ollama (fallback) ────────────────────────────────────────────────────
     if not await ollama.is_available():
         return JSONResponse({"error": "Ollama is not running. Start it with: ollama serve"}, status_code=503)
 
-    image_bytes = await image.read() if image else None
-
-    # Try vision model first; fall back to text model if vision model not installed
     try:
         if image_bytes:
             answer = await ollama.generate_with_image(question, image_bytes=image_bytes)
@@ -313,9 +346,8 @@ async def image_chat(
         try:
             fallback_prompt = (
                 f"A student is looking at an image and asked: {question}\n\n"
-                "The image analysis model is not installed, so answer based on the question text alone. "
-                "Give a clear educational answer for a Grade 6 student. "
-                "End with: (Note: Install a vision model with 'ollama pull moondream2' for full image analysis.)"
+                "Answer based on the question text alone. "
+                "Give a clear educational answer for a Grade 6 student."
             )
             answer = await ollama.generate(fallback_prompt)
         except Exception as text_err:

@@ -1,8 +1,10 @@
 """Content generation routes — notes, MCQ quiz, leaderboard, rewards, file upload."""
 
+import asyncio
 import io
 import json
 import logging
+import os
 import re
 from datetime import datetime
 
@@ -59,21 +61,50 @@ async def _extract_text(file: UploadFile) -> str:
 
 def _parse_json_from_llm(text: str):
     """Extract the first JSON array from an LLM response that may have extra prose."""
-    m = re.search(r'\[.*?\]', text, re.DOTALL)
+    # Strip markdown code fences (Gemini wraps JSON in ```json ... ```)
+    text = re.sub(r'```(?:json)?\s*', '', text).strip().rstrip('`').strip()
+
+    # Greedy match to capture the full outer array (not a nested one)
+    m = re.search(r'\[.*\]', text, re.DOTALL)
     if m:
         try:
             return json.loads(m.group(0))
         except Exception:
             pass
-    # Try to fix common issues: trailing commas
+    # Fix trailing commas and retry
     cleaned = re.sub(r',\s*([}\]])', r'\1', text)
-    m = re.search(r'\[.*?\]', cleaned, re.DOTALL)
+    m = re.search(r'\[.*\]', cleaned, re.DOTALL)
     if m:
         try:
             return json.loads(m.group(0))
         except Exception:
             pass
     return None
+
+
+# ── AI generation helper — Gemini primary, Ollama fallback ───────────────────
+
+async def _ai_generate(prompt: str) -> str:
+    """Try OpenAI first; fall back to Ollama if unavailable."""
+    key = os.getenv("OPENAI_API_KEY", "")
+    if key:
+        try:
+            from openai import AsyncOpenAI
+            client = AsyncOpenAI(api_key=key)
+            resp = await client.chat.completions.create(
+                model="gpt-4o-mini",
+                max_tokens=1024,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            return resp.choices[0].message.content
+        except Exception as e:
+            logger.warning("OpenAI generation failed: %s — trying Ollama", e)
+
+    from app import ollama
+    if await ollama.is_available():
+        return await ollama.generate(prompt)
+
+    raise RuntimeError("No AI backend available — set OPENAI_API_KEY or start Ollama")
 
 
 # ── Upload reference material ─────────────────────────────────────────────────
@@ -115,10 +146,7 @@ async def upload_content(
 
 @router.post("/api/content/generate-notes")
 async def generate_notes(req: GenerateNotesReq):
-    from app import mongo_svc, ollama
-
-    if not await ollama.is_available():
-        raise HTTPException(503, "Ollama not available")
+    from app import mongo_svc
 
     context = req.context
     if not context:
@@ -156,7 +184,10 @@ COMMON MISTAKE: (the one thing students most often get wrong and why it is wrong
 
 Keep the total under 280 words. Write in plain English — no bullet symbols, no markdown."""
 
-    notes_text = await ollama.generate(prompt)
+    try:
+        notes_text = await _ai_generate(prompt)
+    except RuntimeError as e:
+        raise HTTPException(503, str(e))
 
     doc = {
         "topic":        req.topic,
@@ -177,10 +208,7 @@ Keep the total under 280 words. Write in plain English — no bullet symbols, no
 
 @router.post("/api/content/generate-quiz")
 async def generate_quiz(req: GenerateQuizReq):
-    from app import mongo_svc, ollama
-
-    if not await ollama.is_available():
-        raise HTTPException(503, "Ollama not available")
+    from app import mongo_svc
 
     n = min(max(req.num_questions, 2), 10)
 
@@ -221,7 +249,10 @@ Rules:
 - Simple language suitable for 11-12 year olds
 - Generate exactly {n} items in the array"""
 
-    raw       = await ollama.generate(prompt)
+    try:
+        raw = await _ai_generate(prompt)
+    except RuntimeError as e:
+        raise HTTPException(503, str(e))
     questions = _parse_json_from_llm(raw)
 
     if not questions:

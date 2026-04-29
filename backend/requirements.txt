@@ -12,3 +12,6 @@ markdown
 pymongo
 pdfplumber
 python-docx
+openai
+face_recognition
+Pillow

@@ -17,13 +17,12 @@ class ObsidianService:
         self.vault = Path(VAULT_PATH) if VAULT_PATH else None
         self.mongo = mongo_service
         self.redis = redis_service
-        self.ollama = ollama_service
+        self.ollama = ollama_service  # fallback only
 
     def is_configured(self) -> bool:
         return self.vault is not None and self.vault.exists()
 
     async def index_vault(self) -> int:
-        """Walk vault directory, index all .md files + linked images."""
         if not self.is_configured():
             logger.warning("Obsidian vault not configured or not found: %s", VAULT_PATH)
             return 0
@@ -43,29 +42,21 @@ class ObsidianService:
         return count
 
     def _extract_image_paths(self, text: str, base_dir: Path) -> list[str]:
-        """Extract image paths from Obsidian markdown (wikilinks + standard)."""
         paths = []
-        wikilink_images = re.findall(r'!\[\[([^\]]+)\]\]', text)
-        for name in wikilink_images:
+        for name in re.findall(r'!\[\[([^\]]+)\]\]', text):
             for ext in IMAGE_EXTS:
                 candidate = base_dir / name if name.endswith(tuple(IMAGE_EXTS)) else base_dir / (name + ext)
                 if candidate.exists():
                     paths.append(str(candidate))
                     break
-
-        standard_images = re.findall(r'!\[[^\]]*\]\(([^)]+)\)', text)
-        for rel in standard_images:
+        for rel in re.findall(r'!\[[^\]]*\]\(([^)]+)\)', text):
             candidate = (base_dir / rel).resolve()
             if candidate.exists() and candidate.suffix.lower() in IMAGE_EXTS:
                 paths.append(str(candidate))
-
         return paths
 
     async def answer_query(self, query: str, image_path: str | None = None) -> str:
-        """RAG: retrieve context from vault, then ask Ollama."""
-        if not self.ollama:
-            return "Ollama is not available."
-
+        """RAG: retrieve context from vault, then generate with Gemini (fallback: Ollama)."""
         context_chunks: list[str] = []
 
         if self.mongo:
@@ -79,30 +70,78 @@ class ObsidianService:
 
         context = "\n---\n".join(context_chunks) if context_chunks else "No relevant notes found."
 
-        if image_path and Path(image_path).exists():
-            prompt = (
-                f"You are a teacher assistant. The student has attached an image and asks:\n\n"
-                f"Question: {query}\n\n"
-                f"Relevant notes from teacher's Obsidian vault:\n{context}\n\n"
-                f"Please answer clearly using the notes and the image."
-            )
-            response = await self.ollama.generate_with_image(prompt, image_path=image_path)
-        else:
-            prompt = (
-                f"You are a helpful teacher assistant with access to the teacher's Obsidian notes.\n\n"
-                f"Relevant notes:\n{context}\n\n"
-                f"Question: {query}\n\n"
-                f"Answer clearly and concisely:"
-            )
-            response = await self.ollama.generate(prompt)
+        answer = await self._gemini(query, context, image_path)
+        if answer is None:
+            answer = await self._ollama_fallback(query, context, image_path)
+        if answer is None:
+            return "Could not generate an answer — check your Gemini API key or start Ollama."
 
         if self.redis:
-            await self.redis.cache_vault_chunk(f"query:{hash(query)}", response, ttl=300)
+            await self.redis.cache_vault_chunk(f"query:{hash(query)}", answer, ttl=300)
 
-        return response
+        return answer
+
+    async def _gemini(self, query: str, context: str, image_path: str | None) -> str | None:
+        key = os.getenv("OPENAI_API_KEY", "")
+        if not key:
+            return None
+        try:
+            import base64
+            from openai import AsyncOpenAI
+            client = AsyncOpenAI(api_key=key)
+
+            if image_path and Path(image_path).exists():
+                img_bytes  = Path(image_path).read_bytes()
+                img_b64    = base64.standard_b64encode(img_bytes).decode()
+                ext        = Path(image_path).suffix.lower().lstrip(".")
+                media_map  = {"jpg": "image/jpeg", "jpeg": "image/jpeg",
+                              "png": "image/png", "webp": "image/webp", "gif": "image/gif"}
+                media_type = media_map.get(ext, "image/jpeg")
+                content = [
+                    {"type": "image_url", "image_url": {"url": f"data:{media_type};base64,{img_b64}"}},
+                    {"type": "text", "text": (
+                        f"You are a teacher assistant with access to the teacher's Obsidian vault notes.\n\n"
+                        f"Relevant notes:\n{context}\n\n"
+                        f"Question: {query}\n\nAnswer clearly using both the notes and the image."
+                    )},
+                ]
+            else:
+                content = (
+                    f"You are a helpful teacher assistant with access to the teacher's Obsidian notes.\n\n"
+                    f"Relevant notes:\n{context}\n\nQuestion: {query}\n\nAnswer clearly and concisely:"
+                )
+
+            resp = await client.chat.completions.create(
+                model="gpt-4o-mini",
+                max_tokens=1024,
+                messages=[{"role": "user", "content": content}],
+            )
+            return resp.choices[0].message.content
+        except Exception as e:
+            logger.warning("OpenAI RAG failed: %s", e)
+            return None
+
+    async def _ollama_fallback(self, query: str, context: str, image_path: str | None) -> str | None:
+        if not self.ollama:
+            return None
+        try:
+            if image_path and Path(image_path).exists():
+                prompt = (
+                    f"You are a teacher assistant. Question: {query}\n\n"
+                    f"Relevant notes:\n{context}\n\nAnswer using the notes and image."
+                )
+                return await self.ollama.generate_with_image(prompt, image_path=image_path)
+            else:
+                prompt = (
+                    f"You are a helpful teacher assistant.\n\n"
+                    f"Relevant notes:\n{context}\n\nQuestion: {query}\n\nAnswer clearly:"
+                )
+                return await self.ollama.generate(prompt)
+        except Exception as e:
+            logger.warning("Ollama RAG fallback failed: %s", e)
+            return None
 
     async def watch_vault(self):
-        """Periodically re-index vault to pick up new notes."""
         if not self.is_configured():
             return
         while True:
