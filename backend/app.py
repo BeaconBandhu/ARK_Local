@@ -166,10 +166,23 @@ async def analyse(req: AnalyseRequest):
     await redis_svc.enqueue_for_sync(result)
     await _broadcast(result)
 
-    # Also append to per-student history in MongoDB
+    # Immediately persist to MongoDB (don't wait for the slow sync loop)
     try:
         if await mongo_svc.is_available():
-            history_record = {**result, "recorded_at": datetime.utcnow().isoformat()}
+            # Upsert latest state into students collection
+            await mongo_svc.db.students.replace_one(
+                {"student_id": result["student_id"]},
+                result,
+                upsert=True,
+            )
+            # Append a history record
+            history_record = {
+                "student_id":  result["student_id"],
+                "drift_score": result["drift_score"],
+                "fingerprint": result["fingerprint"],
+                "topic":       result["topic"],
+                "timestamp":   result["timestamp"],
+            }
             await mongo_svc.db.students_history.insert_one(history_record)
     except Exception:
         pass
@@ -179,8 +192,43 @@ async def analyse(req: AnalyseRequest):
 
 @app.get("/api/class-data")
 async def class_data():
-    students = await redis_svc.get_all_students()
-    return JSONResponse({"students": students, "count": len(students)})
+    redis_students = await redis_svc.get_all_students()
+    redis_ids = {s.get("student_id") for s in redis_students}
+
+    # Merge with all students stored in MongoDB (seeded + previously synced)
+    mongo_students = []
+    try:
+        if await mongo_svc.is_available():
+            cursor = mongo_svc.db.students.find({}, {"_id": 0}).sort("timestamp", -1).limit(200)
+            all_mongo = await cursor.to_list(length=200)
+            mongo_students = [s for s in all_mongo if s.get("student_id") not in redis_ids]
+    except Exception:
+        pass
+
+    all_students = redis_students + mongo_students
+    return JSONResponse({"students": all_students, "count": len(all_students)})
+
+
+@app.get("/api/classmates")
+async def classmates(exclude: str = "", topic: str = "", limit: int = 6):
+    """Return other students (same topic) for the Ask a Classmate feature."""
+    peers = []
+    try:
+        if await mongo_svc.is_available():
+            query = {}
+            if exclude:
+                query["student_id"] = {"$ne": exclude}
+            if topic:
+                query["topic"] = topic
+            cursor = mongo_svc.db.students.find(
+                query,
+                {"_id": 0, "student_id": 1, "student_name": 1, "fingerprint": 1,
+                 "drift_score": 1, "topic": 1, "what_is_wrong": 1, "remediation": 1}
+            ).limit(limit)
+            peers = await cursor.to_list(length=limit)
+    except Exception:
+        pass
+    return JSONResponse({"peers": peers})
 
 
 @app.post("/api/set-topic")

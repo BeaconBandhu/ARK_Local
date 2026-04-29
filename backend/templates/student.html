@@ -220,6 +220,19 @@
       border-radius: 10px; color: #fff; font-size: 1.1rem; cursor: pointer; flex-shrink: 0;
     }
 
+    /* ── CLASSMATE CARDS ── */
+    .classmate-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .classmate-card {
+      background: var(--accent); border: 1px solid var(--border);
+      border-radius: 12px; padding: 12px; cursor: pointer;
+      transition: border-color .2s;
+    }
+    .classmate-card:hover { border-color: var(--primary); }
+    .classmate-name { font-weight: 700; font-size: 0.88rem; margin-bottom: 4px; }
+    .classmate-meta { font-size: 0.75rem; color: var(--muted); margin-bottom: 6px; }
+    .classmate-fp { font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 10px; border: 1px solid; display: inline-block; }
+    .classmate-drift { font-size: 0.72rem; color: var(--muted); margin-left: 6px; }
+
     /* ── UTILS ── */
     .pill { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
 
@@ -346,6 +359,15 @@
         <div class="s-card">
           <h4>Follow-Up Question For You</h4>
           <div class="followup-q" id="res-followup"></div>
+        </div>
+
+        <!-- Ask a Classmate -->
+        <div class="s-card" id="classmates-card" hidden>
+          <h4>Ask a Classmate</h4>
+          <p style="font-size:.8rem;color:var(--muted);margin-bottom:12px">
+            These classmates answered the same topic — find one who got a different fingerprint and ask them how they understood it.
+          </p>
+          <div id="classmates-grid"></div>
         </div>
 
       </div>
@@ -493,8 +515,26 @@ function showApp() {
   document.getElementById('screen-app').hidden   = false;
   document.getElementById('hdr-name').textContent = student.name;
   document.getElementById('hdr-id').textContent   = student.id;
-  if (lastResult) renderResult(lastResult);
+  if (lastResult) {
+    renderResult(lastResult);
+  } else {
+    // Fetch latest result from server (for seeded/returning students)
+    fetchServerResult();
+  }
   loadHistory();
+}
+
+async function fetchServerResult() {
+  try {
+    const res = await fetch(SERVER + '/api/student/' + student.id);
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data && data.fingerprint) {
+      lastResult = data;
+      localStorage.setItem('ark_last_result', JSON.stringify(data));
+      renderResult(data);
+    }
+  } catch (_) { /* server offline */ }
 }
 
 // Enter key on login inputs
@@ -592,11 +632,14 @@ function renderResult(data) {
   skipped.forEach(n   => grid.appendChild(makeChip(n, 'skipped',   '✗')));
   wrong.forEach(n     => grid.appendChild(makeChip(n, 'wrong',     '⚠')));
 
-  // Text
+  // Text — handle both top-level (/analyse response) and nested (seeded MongoDB format)
   const rem = data.remediation || {};
-  document.getElementById('res-wrong').textContent    = rem.what_is_wrong       || data.explanation || '—';
-  document.getElementById('res-story').textContent    = rem.story_fix            || '—';
-  document.getElementById('res-followup').textContent = rem.follow_up_question   || '—';
+  document.getElementById('res-wrong').textContent    = data.what_is_wrong     || rem.what_is_wrong     || '—';
+  document.getElementById('res-story').textContent    = data.story_fix          || rem.story_fix          || '—';
+  document.getElementById('res-followup').textContent = data.follow_up_question || rem.follow_up_question || '—';
+
+  // Load classmates for the same topic
+  if (data.topic) loadClassmates(data.topic, data.fingerprint);
 }
 
 function makeChip(name, cls, icon) {
@@ -727,6 +770,51 @@ function renderProgress(history) {
       <tbody>${rows}</tbody>
     </table>
   `;
+}
+
+// ══════════════════════════════════════════════
+// CLASSMATES (Ask a Classmate)
+// ══════════════════════════════════════════════
+async function loadClassmates(topic, myFingerprint) {
+  try {
+    const res  = await fetch(`${SERVER}/api/classmates?exclude=${student.id}&topic=${topic}`);
+    if (!res.ok) return;
+    const data = await res.json();
+    const peers = data.peers || [];
+    if (!peers.length) return;
+
+    document.getElementById('classmates-card').hidden = false;
+    const grid = document.getElementById('classmates-grid');
+    grid.className = 'classmate-grid';
+    grid.innerHTML = '';
+
+    peers.forEach(p => {
+      const col  = FP_COLOR[p.fingerprint] || '#8892a4';
+      const diff = p.fingerprint !== myFingerprint ? ' ✦ different type' : '';
+      const card = document.createElement('div');
+      card.className = 'classmate-card';
+      card.innerHTML = `
+        <div class="classmate-name">${p.student_name}</div>
+        <div class="classmate-meta">${(p.topic || '').replace(/_/g,' ')}${diff}</div>
+        <span class="classmate-fp" style="color:${col};border-color:${col};background:${col}18">${p.fingerprint}</span>
+        <span class="classmate-drift">drift ${Math.round((p.drift_score||0)*100)}%</span>
+      `;
+      card.onclick = () => showClassmateDetail(p);
+      grid.appendChild(card);
+    });
+  } catch (_) { /* server offline */ }
+}
+
+function showClassmateDetail(peer) {
+  const col = FP_COLOR[peer.fingerprint] || '#8892a4';
+  const rem = peer.remediation || {};
+  const wrong = peer.what_is_wrong || rem.what_is_wrong || '';
+  alert(
+    `${peer.student_name} — ${peer.fingerprint}\n\n` +
+    `Topic: ${(peer.topic||'').replace(/_/g,' ')}\n` +
+    `Drift: ${Math.round((peer.drift_score||0)*100)}%\n\n` +
+    (wrong ? `Their gap: ${wrong}\n\nAsk them how they fixed this understanding!` : 'Ask them how they approach this topic!')
+  );
 }
 
 // ══════════════════════════════════════════════
