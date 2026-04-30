@@ -363,13 +363,19 @@ async def get_quiz(topic: str, lang: str = "english"):
 async def submit_quiz(req: QuizSubmitReq):
     from app import mongo_svc
 
+    quiz_doc = None
     try:
-        quiz_doc = await mongo_svc.db.quiz_questions.find_one({"topic": req.topic}, {"_id": 0})
+        if await mongo_svc.is_available():
+            # Match exact key OR base topic (handles language-suffixed keys like photosynthesis__hindi)
+            quiz_doc = await mongo_svc.db.quiz_questions.find_one(
+                {"$or": [{"topic": req.topic}, {"topic_base": req.topic}]},
+                {"_id": 0},
+            )
     except Exception as e:
-        raise HTTPException(500, str(e))
+        logger.warning("quiz submit DB error: %s", e)
 
     if not quiz_doc:
-        raise HTTPException(404, f"No quiz found for topic '{req.topic}'. Ask your teacher to generate one.")
+        raise HTTPException(404, f"No quiz found for topic '{req.topic}'. Ask your teacher to generate one in the Content Lab first.")
 
     questions      = quiz_doc.get("questions", [])
     correct_list   = [q["correct"] for q in questions]

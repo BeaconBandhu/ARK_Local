@@ -13,6 +13,7 @@ router = APIRouter()
 
 TEMPLATE_PATH  = Path(__file__).parent / "templates" / "dashboard.html"
 STUDENT_PATH   = Path(__file__).parent / "templates" / "student.html"
+SW_PATH        = Path(__file__).parent / "static"    / "sw.js"
 
 # ── Serve the dashboard HTML ─────────────────────────────────────────────────
 
@@ -28,6 +29,21 @@ async def student_portal():
     if not STUDENT_PATH.exists():
         raise HTTPException(404, "student.html not found")
     return FileResponse(str(STUDENT_PATH), media_type="text/html")
+
+
+@router.get("/sw.js", include_in_schema=False)
+async def service_worker():
+    """Serve the Service Worker at root scope so it controls /student."""
+    if not SW_PATH.exists():
+        raise HTTPException(404, "sw.js not found")
+    return FileResponse(
+        str(SW_PATH),
+        media_type="application/javascript",
+        headers={
+            "Service-Worker-Allowed": "/",
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+        },
+    )
 
 
 # ── Student detail from MongoDB (with Redis fallback) ────────────────────────

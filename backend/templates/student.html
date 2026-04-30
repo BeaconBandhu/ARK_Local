@@ -267,6 +267,32 @@
       width: 100%; border-radius: 12px; border: 1px solid var(--border);
       margin-top: 12px; display: block; background: var(--accent);
     }
+
+    /* ── OFFLINE / SYNC BARS ── */
+    .offline-bar {
+      position: fixed; bottom: 49px; left: 0; right: 0; z-index: 90;
+      background: #5b21b6; color: #ede9fe; font-size: .76rem; font-weight: 600;
+      padding: 6px 14px; display: flex; align-items: center;
+      justify-content: space-between; gap: 8px; border-top: 1px solid #7c3aed;
+      transform: translateY(0); transition: transform .25s;
+    }
+    .offline-bar.hidden { transform: translateY(100%); }
+    .sync-bar {
+      position: fixed; bottom: 49px; left: 0; right: 0; z-index: 91;
+      background: #0f3460; color: #34d399; font-size: .76rem; font-weight: 600;
+      padding: 6px 14px; display: flex; align-items: center; gap: 8px;
+      border-top: 1px solid #1e3a5f;
+    }
+    @keyframes ark-spin { to { transform: rotate(360deg); } }
+    .sync-spin { display: inline-block; animation: ark-spin 1s linear infinite; }
+    .ark-toast {
+      position: fixed; top: 72px; left: 50%; transform: translateX(-50%);
+      background: #1e293b; color: #e2e8f0; border: 1px solid #334155;
+      padding: 9px 18px; border-radius: 10px; font-size: .82rem; font-weight: 600;
+      z-index: 500; opacity: 0; transition: opacity .3s; pointer-events: none;
+      white-space: nowrap;
+    }
+    .ark-toast.show { opacity: 1; }
   </style>
 </head>
 <body>
@@ -672,7 +698,22 @@ then ask a question about it.</div>
     </button>
   </nav>
 
+  <!-- Offline queue bar — sits just above the nav bar -->
+  <div id="offline-bar" class="offline-bar hidden">
+    <span>📴 Offline — <strong id="queue-count">0</strong> answer(s) queued</span>
+    <span style="opacity:.7;font-size:.7rem">Auto-syncs when WiFi returns</span>
+  </div>
+
+  <!-- Sync progress bar — shown while flushing queue -->
+  <div id="sync-bar" class="sync-bar" style="display:none">
+    <span class="sync-spin">⟳</span>
+    <span>Syncing <strong id="sync-count">0</strong> answer(s) to server…</span>
+  </div>
+
 </div>
+
+<!-- Toast notification -->
+<div id="ark-toast" class="ark-toast"></div>
 
 <script>
 // ══════════════════════════════════════════════
@@ -980,6 +1021,165 @@ let lastResult = null;
 let progChart  = null;
 let selImage   = null;
 
+// ══════════════════════════════════════════════
+// INDEXEDDB — offline submission queue
+// ══════════════════════════════════════════════
+const _IDB_NAME  = 'ark_offline';
+const _IDB_VER   = 1;
+const _IDB_STORE = 'pending_queue';
+let   _idb       = null;
+
+function _openIDB() {
+  if (_idb) return Promise.resolve(_idb);
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(_IDB_NAME, _IDB_VER);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(_IDB_STORE))
+        db.createObjectStore(_IDB_STORE, { keyPath: 'id', autoIncrement: true });
+    };
+    req.onsuccess = e => { _idb = e.target.result; resolve(_idb); };
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+async function _idbAdd(data) {
+  const db = await _openIDB();
+  return new Promise((resolve, reject) => {
+    const req = db.transaction(_IDB_STORE, 'readwrite')
+                  .objectStore(_IDB_STORE).add({ data, ts: Date.now() });
+    req.onsuccess = () => resolve(req.result);
+    req.onerror   = () => reject(req.error);
+  });
+}
+
+async function _idbAll() {
+  const db = await _openIDB();
+  return new Promise((resolve, reject) => {
+    const req = db.transaction(_IDB_STORE, 'readonly')
+                  .objectStore(_IDB_STORE).getAll();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror   = () => reject(req.error);
+  });
+}
+
+async function _idbRemove(id) {
+  const db = await _openIDB();
+  return new Promise((resolve, reject) => {
+    const req = db.transaction(_IDB_STORE, 'readwrite')
+                  .objectStore(_IDB_STORE).delete(id);
+    req.onsuccess = () => resolve();
+    req.onerror   = () => reject(req.error);
+  });
+}
+
+// ══════════════════════════════════════════════
+// OFFLINE UI HELPERS
+// ══════════════════════════════════════════════
+async function _updateOfflineBar() {
+  const bar    = document.getElementById('offline-bar');
+  const countEl = document.getElementById('queue-count');
+  if (!bar) return;
+  const items = await _idbAll();
+  const n     = items.length;
+  if (countEl) countEl.textContent = n;
+  bar.classList.toggle('hidden', navigator.onLine && n === 0);
+}
+
+let _toastTimer = null;
+function _showToast(msg, ms = 3500) {
+  const el = document.getElementById('ark-toast');
+  if (!el) return;
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.classList.remove('show'), ms);
+}
+
+// ══════════════════════════════════════════════
+// SYNC QUEUE — flush IndexedDB → /analyse
+// ══════════════════════════════════════════════
+let _syncing = false;
+
+async function syncQueue() {
+  if (_syncing || !navigator.onLine) return;
+  const items = await _idbAll();
+  if (!items.length) return;
+
+  _syncing = true;
+  const bar   = document.getElementById('sync-bar');
+  const cntEl = document.getElementById('sync-count');
+  if (bar)   bar.style.display = 'flex';
+  if (cntEl) cntEl.textContent = items.length;
+  document.getElementById('offline-bar').classList.add('hidden');
+
+  let synced = 0;
+  for (const item of items) {
+    try {
+      const res = await fetch(SERVER + '/analyse', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(item.data),
+      });
+      if (res.ok) {
+        await _idbRemove(item.id);
+        synced++;
+        try {
+          const d = await res.clone().json();
+          if (student && d.student_id === student.id) {
+            lastResult = d;
+            localStorage.setItem('ark_last_result', JSON.stringify(d));
+            renderResult(d);
+          }
+        } catch (_) {}
+      }
+    } catch (_) {}
+  }
+
+  _syncing = false;
+  if (bar) bar.style.display = 'none';
+  await _updateOfflineBar();
+
+  if (synced) {
+    _showToast(`✅ ${synced} answer${synced > 1 ? 's' : ''} synced to server!`);
+    loadHistory();
+  } else {
+    _showToast('⚠️ Sync failed — will retry automatically');
+  }
+}
+
+// ══════════════════════════════════════════════
+// SERVICE WORKER REGISTRATION
+// ══════════════════════════════════════════════
+let _swReg = null;
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js', { scope: '/' })
+    .then(reg => { _swReg = reg; })
+    .catch(e  => console.warn('ARK SW registration failed:', e));
+
+  navigator.serviceWorker.addEventListener('message', e => {
+    if (!e.data || e.data.type !== 'ARK_SYNC_DONE') return;
+    _updateOfflineBar();
+    if (e.data.sent > 0) {
+      _showToast(`✅ ${e.data.sent} answer${e.data.sent > 1 ? 's' : ''} synced!`);
+      loadHistory();
+    }
+  });
+}
+
+// ── Online / offline events ─────────────────────────────────────
+window.addEventListener('online', async () => {
+  _updateOfflineBar();
+  // Prefer Background Sync API (SW handles it), fall back to inline
+  if (_swReg) {
+    try { await _swReg.sync.register('ark-sync'); return; } catch (_) {}
+  }
+  syncQueue();
+});
+
+window.addEventListener('offline', () => _updateOfflineBar());
+
 const FP_COLOR = {
   GHOST:    '#f59e0b',
   INVERT:   '#ef4444',
@@ -1059,6 +1259,7 @@ function showApp() {
   loadHistory();
   loadPoints();
   loadTeacherPresence();
+  _updateOfflineBar();
 }
 
 async function loadTeacherPresence() {
@@ -1113,33 +1314,59 @@ async function submitAnswer() {
   if (!answer) { alert('Please write your explanation before submitting.'); return; }
 
   const btn = document.getElementById('btn-submit');
-  btn.textContent = T('analysing');
-  btn.disabled    = true;
+  btn.disabled = true;
 
+  const payload = {
+    student_id:   student.id,
+    student_name: student.name,
+    topic,
+    answer_text:  answer,
+    language:     LANG_TO_API[currentLang],
+  };
+
+  // ── OFFLINE PATH ────────────────────────────────────────────────
+  if (!navigator.onLine) {
+    btn.textContent = '📴 Saving…';
+    try {
+      await _idbAdd(payload);
+      await _updateOfflineBar();
+      _showToast('📴 Saved offline — will sync when WiFi returns');
+      document.getElementById('inp-answer').value = '';
+    } catch (_) {
+      alert('Could not save offline. Please try again.');
+    } finally {
+      btn.textContent = T('submit_btn');
+      btn.disabled    = false;
+    }
+    return;
+  }
+
+  // ── ONLINE PATH ─────────────────────────────────────────────────
+  btn.textContent = T('analysing');
   try {
     const res = await fetch(SERVER + '/analyse', {
-      method: 'POST',
+      method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        student_id:   student.id,
-        student_name: student.name,
-        topic,
-        answer_text:  answer,
-        language:     LANG_TO_API[currentLang],
-      }),
+      body:    JSON.stringify(payload),
     });
-    if (!res.ok) throw new Error(`Server error ${res.status}`);
+    if (!res.ok) throw new Error(`${res.status}`);
     const data = await res.json();
-    lastResult = data;
+    lastResult  = data;
     localStorage.setItem('ark_last_result', JSON.stringify(data));
     renderResult(data);
-    // Jump to result tab
     document.querySelectorAll('.tab-panel').forEach(p => p.hidden = true);
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     document.getElementById('tab-result').hidden = false;
     document.querySelectorAll('.nav-btn')[3].classList.add('active');
-  } catch (e) {
-    alert('Could not reach the backend.\n\nMake sure the server is running at:\n' + SERVER);
+  } catch (_) {
+    // Online but request failed — queue locally and tell the student
+    try {
+      await _idbAdd(payload);
+      await _updateOfflineBar();
+      _showToast('⚠️ Server unreachable — answer saved locally');
+    } catch (_2) {
+      alert('Could not reach the server and could not save offline.\nCheck: ' + SERVER);
+    }
   } finally {
     btn.textContent = T('submit_btn');
     btn.disabled    = false;
@@ -1446,11 +1673,16 @@ async function submitQuiz() {
       body: JSON.stringify({ student_id: student.id, student_name: student.name, topic, answers: ans }),
     });
     const result = await res.json();
-    if (result.error) throw new Error(result.error);
+    if (!res.ok) {
+      throw new Error(result.detail || result.error || `Server error ${res.status}`);
+    }
     showQuizResult(result);
     loadPoints();
   } catch (e) {
-    alert('Submit failed: ' + e.message);
+    const msg = e.message === 'Failed to fetch'
+      ? 'Could not reach the server.\nMake sure the backend is running and you are on the school WiFi.'
+      : e.message;
+    alert(msg);
   } finally {
     btn.textContent = T('quiz_submit_btn');
     btn.disabled    = false;
